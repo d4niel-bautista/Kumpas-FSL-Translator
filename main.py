@@ -45,6 +45,20 @@ class App(ctk.CTk):
             #####TITLE FRAME#####
         self.titleFrame = ctk.CTkFrame(master=self.rightFrame, fg_color="#949090", width = self.window_width * .80, height= self.window_height * .2, corner_radius=0, border_width=0)
         self.titleFrame.grid(row=0, column=0, sticky='new', padx=0, pady=0)
+        self.titleFrame.grid_propagate(False)
+        
+        
+        self.titleGroup = ctk.CTkFrame(master=self.titleFrame,fg_color="#949090")
+        self.titleGroup.grid(row=0, column=0, sticky='nsew', padx=180, pady=0)
+       
+        
+        self.kumpasLogo = ctk.CTkImage(Image.open(self.current_path + "/img/kumpas.png"), size=(184,108))
+        self.kumpasLogoLabel = ctk.CTkLabel(master=self.titleFrame, image=self.kumpasLogo, text="", fg_color='transparent')
+        self.kumpasLogoLabel.place(relx = 0.34, rely = 0.4, anchor = 'e')
+        self.titleSeparator = ctk.CTkFrame(master=self.titleFrame,fg_color="#FFFFFF", height=2, border_width=0, width=self.window_width * .43)
+        self.titleSeparator.place(relx = 0.468, rely = 0.7, anchor = 'center')
+        self.titleLabel = ctk.CTkLabel(master=self.titleFrame, text="FILIPINO SIGN LANGUAGE TRANSLATOR", text_color='#FFFFFF',font=ctk.CTkFont(size=25))
+        self.titleLabel.place(relx = 0.443, rely = 0.83, anchor = 'center')
             #####MAIN FRAME#####
         self.mainFrame = ctk.CTkFrame(master=self.rightFrame, fg_color="#FFFFFF", width = self.window_width * .80, height= self.window_height * .758, corner_radius=0, border_width=0)
         self.mainFrame.grid(row=1, column=0, sticky='news', padx=0, pady=0)
