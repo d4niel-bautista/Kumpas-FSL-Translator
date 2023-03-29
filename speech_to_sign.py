@@ -1,9 +1,11 @@
-
+import os
+from PIL import Image, ImageTk
 import customtkinter as ctk
-
+from color import Color
 class SpeechToSign(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.color = Color()
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
         self.h = 600
@@ -14,12 +16,16 @@ class SpeechToSign(ctk.CTkToplevel):
         self.y_coordinate = int((self.screen_height/2) - (self.window_height/1.9))
         self.geometry(f"{self.window_width}x{self.window_height}+{self.x_coordinate}+{self.y_coordinate}")
         self.grid_propagate(False)
-        self.grid_rowconfigure((0), weight=1)
-        self.grid_columnconfigure((0), weight=1)
         
         self.title('SPEECH TO SIGN')
 
-        self.label = ctk.CTkLabel(self, text="SPEECH TO SIGN")
-        self.label.pack(padx=20, pady=20)
+        self.titleFrame = ctk.CTkFrame(master=self, fg_color=self.color.white, width = self.window_width, height= self.window_height * .13, corner_radius=0, border_width=0)
+        self.titleFrame.grid(row=0, column=0, sticky='new', padx=0, pady=0)
+        self.titleFrame.grid_propagate(False)
+        self.titleFrame.grid_columnconfigure((0), weight=1)
+        self.current_path = os.path.dirname(os.path.realpath(__file__))
+        self.speechToSignLogo = ctk.CTkImage(Image.open(self.current_path + "/img/speech-sign.png"), size=(self.window_width * .0533,self.window_height * .0914))
+        self.speechToSignLogoLabel = ctk.CTkLabel(master=self.titleFrame, image=self.speechToSignLogo, text=" SPEECH TO SIGN", compound='left',text_color=self.color.black,font=ctk.CTkFont(size=25))
+        self.speechToSignLogoLabel.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=0,column=0,sticky='nswe')
 
         self.grab_set()
