@@ -2,7 +2,7 @@ from tkinter import *
 import customtkinter as ctk
 import os
 from PIL import Image, ImageTk
-from tkvideo import tkvideo
+from color import Color
 from sign_to_text import SignToText
 from speech_to_sign import SpeechToSign
 from canvas_vid import CanvasVideoPlayer
@@ -23,78 +23,76 @@ class App(ctk.CTk):
         self.grid_propagate(False)
         self.grid_rowconfigure((0), weight=1)
         self.grid_columnconfigure((0), weight=1)
-
+        self.color = Color()
         #####LEFT FRAME#####
-        self.leftFrame = ctk.CTkFrame(master=self, fg_color="#4B4B4B", width = self.window_width * .21, height= self.window_height * .975, corner_radius=0,border_width=0)
+        self.leftFrame = ctk.CTkFrame(master=self, fg_color=self.color.very_dark_gray, width = self.window_width * .21, height= self.window_height * .975, corner_radius=0,border_width=0)
         self.leftFrame.grid(row=0, column=0, sticky='w', padx=0, pady=0)
         self.leftFrame.grid_propagate(False)
         self.leftFrame.grid_rowconfigure(2, weight=1)
         self.leftFrame.grid_columnconfigure((0), weight=1)
 
         
-        self.separator = ctk.CTkFrame(master=self.leftFrame,fg_color="#000000", height=2, border_width=0, width=self.window_width * .16)
+        self.separator = ctk.CTkFrame(master=self.leftFrame,fg_color=self.color.black, height=2, border_width=0, width=self.window_width * .16)
         self.separator.grid(row=0, column=0, pady=(int(self.window_height * .1058), int(self.window_height * .0147)), columnspan=2)
-        self.leftFrame_firstFrame = ctk.CTkFrame(master=self.leftFrame, fg_color="#D9D9D9", width = self.window_width * .15, height= self.window_height * .3176, corner_radius=15, border_width=0)
+        self.leftFrame_firstFrame = ctk.CTkFrame(master=self.leftFrame, fg_color=self.color.very_light_gray, width = self.window_width * .15, height= self.window_height * .3176, corner_radius=15, border_width=0)
         self.leftFrame_firstFrame.grid(row=1, column=0, sticky='n', padx=0, pady=0, columnspan=2)
 
         self.current_path = os.path.dirname(os.path.realpath(__file__))
-        self.questionmark = ctk.CTkImage(Image.open(self.current_path + "/img/shutdown.png"), size=(39,39))
-        self.leftFrame_shutdown = ctk.CTkButton(master=self.leftFrame, image=self.questionmark, command=self.destroy, text="", fg_color="#4B4B4B", width=self.window_width * .015, height=self.window_height * .0588, border_width=0)
-        self.leftFrame_shutdown.grid(row=2, column=0,sticky='ws', padx=10, pady=20)
+        self.questionmark = ctk.CTkImage(Image.open(self.current_path + "/img/shutdown.png"), size=(self.window_width * 0.0325,self.window_height * .0557))
+        self.leftFrame_shutdown = ctk.CTkButton(master=self.leftFrame, image=self.questionmark, command=self.destroy, text="", fg_color=self.color.very_dark_gray, width=self.window_width * .015, height=self.window_height * .0588, border_width=0)
+        self.leftFrame_shutdown.grid(row=2, column=0,sticky='ws', padx=self.window_width * .0083, pady=self.window_height * .02857)
         
         #####RIGHT FRAME#####
-        self.rightFrame = ctk.CTkFrame(master=self, fg_color="#FFFFFF", width = self.window_width * .80, height= self.window_height * .975, corner_radius=0, border_width=0)
+        self.rightFrame = ctk.CTkFrame(master=self, fg_color=self.color.white, width = self.window_width * .80, height= self.window_height * .975, corner_radius=0, border_width=0)
         self.rightFrame.grid(row=0, column=1, sticky='new', padx=0, pady=0)
         self.rightFrame.grid_propagate(False)
             #####TITLE FRAME#####
-        self.titleFrame = ctk.CTkFrame(master=self.rightFrame, fg_color="#949090", width = self.window_width * .80, height= self.window_height * .2, corner_radius=0, border_width=0)
+        self.titleFrame = ctk.CTkFrame(master=self.rightFrame, fg_color=self.color.dark_grayish_red, width = self.window_width * .80, height= self.window_height * .2, corner_radius=0, border_width=0)
         self.titleFrame.grid(row=0, column=0, sticky='new', padx=0, pady=0)
         self.titleFrame.grid_propagate(False)
         
         
-        self.titleGroup = ctk.CTkFrame(master=self.titleFrame,fg_color="#949090")
-        self.titleGroup.grid(row=0, column=0, sticky='nsew', padx=180, pady=0)
+        self.titleGroup = ctk.CTkFrame(master=self.titleFrame,fg_color=self.color.dark_grayish_red)
+        self.titleGroup.grid(row=0, column=0, sticky='nsew', padx=self.window_width * 0.15, pady=0)
        
         
-        self.kumpasLogo = ctk.CTkImage(Image.open(self.current_path + "/img/kumpas.png"), size=(184,108))
-        self.kumpasLogoLabel = ctk.CTkLabel(master=self.titleFrame, image=self.kumpasLogo, text="", fg_color='transparent')
+        self.kumpasLogo = ctk.CTkImage(Image.open(self.current_path + "/img/kumpas.png"), size=(self.window_width * .1533,self.window_height * .15428))
+        self.kumpasLogoLabel = ctk.CTkLabel(master=self.titleFrame, image=self.kumpasLogo, text="", fg_color=self.color.transparent)
         self.kumpasLogoLabel.place(relx = 0.34, rely = 0.4, anchor = 'e')
-        self.titleSeparator = ctk.CTkFrame(master=self.titleFrame,fg_color="#FFFFFF", height=2, border_width=0, width=self.window_width * .43)
+        self.titleSeparator = ctk.CTkFrame(master=self.titleFrame,fg_color=self.color.white, height=2, border_width=0, width=self.window_width * .43)
         self.titleSeparator.place(relx = 0.468, rely = 0.7, anchor = 'center')
-        self.titleLabel = ctk.CTkLabel(master=self.titleFrame, text="FILIPINO SIGN LANGUAGE TRANSLATOR", text_color='#FFFFFF',font=ctk.CTkFont(size=25))
+        self.titleLabel = ctk.CTkLabel(master=self.titleFrame, text="FILIPINO SIGN LANGUAGE TRANSLATOR", text_color=self.color.white,font=ctk.CTkFont(size=25))
         self.titleLabel.place(relx = 0.443, rely = 0.83, anchor = 'center')
             #####MAIN FRAME#####
-        self.mainFrame = ctk.CTkFrame(master=self.rightFrame, fg_color="#FFFFFF", width = self.window_width * .80, height= self.window_height * .758, corner_radius=0, border_width=0)
+        self.mainFrame = ctk.CTkFrame(master=self.rightFrame, fg_color=self.color.white, width = self.window_width * .80, height= self.window_height * .758, corner_radius=0, border_width=0)
         self.mainFrame.grid(row=1, column=0, sticky='news', padx=0, pady=0)
         self.mainFrame.grid_propagate(False)
                 #####MAIN FRAME - SIGN TO TEXT#####
                 
-        self.mainFrame_signToText = ctk.CTkFrame(master=self.mainFrame, fg_color="#FFFFFF", width = self.window_width * .80, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
+        self.mainFrame_signToText = ctk.CTkFrame(master=self.mainFrame, fg_color=self.color.white, width = self.window_width * .80, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
         self.mainFrame_signToText.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
         self.mainFrame_signToText.grid_propagate(False)
         self.mainFrame_signToText.grid_columnconfigure((0,1),weight=1)
-        # self.mainFrame_signToTextGroup = ctk.CTkFrame(master=self.mainFrame_signToText, fg_color="transparent", width = (self.window_width * .80)/2, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
-        # self.mainFrame_signToTextGroup.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
-        # self.mainFrame_signToTextGroup.grid_propagate(False)
-        # self.mainFrame_signToTextGroup.bind('<Button-1>', self.signToText)
 
-        # self.signToTextLogo = ctk.CTkImage(Image.open(self.current_path + "/img/sign-text.png"), size=(64,64))
-        # self.signToTextLogoLabel = ctk.CTkLabel(master=self.mainFrame_signToTextGroup, image=self.signToTextLogo, text=" SIGN TO TEXT", compound='left',text_color='#000000',font=ctk.CTkFont(size=25))
-        # self.signToTextLogoLabel.grid(pady=8, padx=20, row=0,column=1,sticky='nswe')
-        # self.signToTextLogoLabel.bind('<Button-1>', self.signToText)
-        # self.signToTextDesc = ctk.CTkLabel(master=self.mainFrame_signToTextGroup,wraplength=int(((self.window_width * .80)/2)-30), fg_color='transparent',text="IT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXT",text_color='#000000',font=ctk.CTkFont(size=15))
-        # self.signToTextDesc.grid(pady=8, padx=20, row=1,column=1,sticky='nswe')
-        # self.signToTextDesc.bind('<Button-1>', self.signToText).
+        self.mainFrame_signToTextGroup = ctk.CTkFrame(master=self.mainFrame_signToText, fg_color=self.color.transparent, width = (self.window_width * .80)/2, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
+        self.mainFrame_signToTextGroup.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
+        self.mainFrame_signToTextGroup.grid_propagate(False)
+        self.mainFrame_signToTextGroup.bind('<Button-1>', self.signToText)
+        self.signToTextLogo = ctk.CTkImage(Image.open(self.current_path + "/img/sign-text.png"), size=(self.window_width * .0533,self.window_height * .0914))
+        self.signToTextLogoLabel = ctk.CTkLabel(master=self.mainFrame_signToTextGroup, image=self.signToTextLogo, text=" SIGN TO TEXT", compound='left',text_color=self.color.black,font=ctk.CTkFont(size=25))
+        self.signToTextLogoLabel.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=0,column=1,sticky='nswe')
+        self.signToTextLogoLabel.bind('<Button-1>', self.signToText)
+        self.signToTextDesc = ctk.CTkLabel(master=self.mainFrame_signToTextGroup,wraplength=int(((self.window_width * .80)/2)-30), fg_color=self.color.transparent,text="IT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXT",text_color=self.color.black,font=ctk.CTkFont(size=15))
+        self.signToTextDesc.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=1,column=1,sticky='nswe')
+        self.signToTextDesc.bind('<Button-1>', self.signToText)
         
-        self.canvas = ctk.CTkCanvas(master=self.mainFrame_signToText, highlightthickness=0, width = self.window_width * .80)
-        self.video = CanvasVideoPlayer(self.canvas,'test.mp4', refresh_rate=0.01)
-        self.video.start()
-        # self.lblVideo = Label(self.canvas, borderwidth=0)
-        # self.lblVideo.grid(pady=0, padx=0, row=0,column=0,sticky='news', ipadx=0,ipady=0)
-        # self.player = tkvideo("test.mp4", self.canvas, loop=1, size=(int((self.window_width * .80)-1),int((self.window_height * .758)+1)))
-        # self.player.play()
+        # self.canvas = ctk.CTkCanvas(master=self.mainFrame_signToText, highlightthickness=0, width = self.window_width * .80)
+        # self.video = CanvasVideoPlayer(self.canvas,'test.mp4', refresh_rate=0.01)
+        # self.video.start()
+        # # self.lblVideo = Label(self.canvas, borderwidth=0)
+        # # self.lblVideo.grid(pady=0, padx=0, row=0,column=0,sticky='news', ipadx=0,ipady=0)
         
-        self.canvas.grid(row=0, column=0, padx=0, pady=0, sticky='news')
+        # self.canvas.grid(row=0, column=0, padx=0, pady=0, sticky='news')
         # self.canvas.create_text(300, 50, text="HELLO WORLD", fill="black", font=('Helvetica 15 bold'))
         # self.signToTextLogoLabel = ctk.CTkLabel(master=self.mainFrame_signToText,text=" SIGN TO TEXT", text_color='#000000',font=ctk.CTkFont(size=25))
         # self.signToTextLogoLabel.grid(pady=8, padx=20, row=0,column=0,sticky='nswe')
@@ -103,28 +101,27 @@ class App(ctk.CTk):
         
         
                 #####MAIN FRAME - SPEECH TO SIGN#####
-        self.mainFrame_speechToSign = ctk.CTkFrame(master=self.mainFrame, fg_color="#FFFFFF", width = self.window_width * .80, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
+        self.mainFrame_speechToSign = ctk.CTkFrame(master=self.mainFrame, fg_color=self.color.white, width = self.window_width * .80, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
         self.mainFrame_speechToSign.grid(row=1, column=0, sticky='nesw', padx=0, pady=0)
         self.mainFrame_speechToSign.grid_propagate(False)
         self.mainFrame_speechToSign.grid_columnconfigure((0,1),weight=1)
         
-        self.lblVideo1 = Canvas(self.mainFrame_speechToSign, borderwidth=0)
-        self.lblVideo1.grid(pady=0, padx=0, row=0,column=0, sticky='news', ipadx=0,ipady=0)
-        self.player1 = tkvideo("slow.mp4", self.lblVideo1, loop=1, size=(int((self.window_width * .80/2)-1),int((self.window_height * .758)/2)+1))
-        self.player1.play()
-        self.mainFrame_speechToSignGroup = ctk.CTkFrame(master=self.mainFrame_speechToSign,fg_color="#FFFFFF", width = (self.window_width * .80)/2, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
+        # self.lblVideo1 = Canvas(self.mainFrame_speechToSign, borderwidth=0)
+        # self.lblVideo1.grid(pady=0, padx=0, row=0,column=0, sticky='news', ipadx=0,ipady=0)
+        
+        self.mainFrame_speechToSignGroup = ctk.CTkFrame(master=self.mainFrame_speechToSign,fg_color=self.color.white, width = (self.window_width * .80)/2, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
         self.mainFrame_speechToSignGroup.grid(row=0, column=1, sticky='nsew', padx=0, pady=0)
         self.mainFrame_speechToSignGroup.grid_propagate(False)
         self.mainFrame_speechToSignGroup.bind('<Button-1>', self.speechToSign)
-        self.speechToSignLogo = ctk.CTkImage(Image.open(self.current_path + "/img/speech-sign.png"), size=(64,64))
-        self.speechToSignLogoLabel = ctk.CTkLabel(master=self.mainFrame_speechToSignGroup, image=self.speechToSignLogo, text="SPEECH TO SIGN ", compound='right',text_color='#000000',font=ctk.CTkFont(size=25))
-        self.speechToSignLogoLabel.grid(pady=8, padx=20, row=0,column=1,sticky='nswe')
+        self.speechToSignLogo = ctk.CTkImage(Image.open(self.current_path + "/img/speech-sign.png"), size=(self.window_width * .0533,self.window_height * .0914))
+        self.speechToSignLogoLabel = ctk.CTkLabel(master=self.mainFrame_speechToSignGroup, image=self.speechToSignLogo, text="SPEECH TO SIGN ", compound='right',text_color=self.color.black,font=ctk.CTkFont(size=25))
+        self.speechToSignLogoLabel.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=0,column=1,sticky='nswe')
         self.speechToSignLogoLabel.bind('<Button-1>', self.speechToSign)
-        self.speechToSignDesc = ctk.CTkLabel(master=self.mainFrame_speechToSignGroup,wraplength=int(((self.window_width * .80)/2)-30), text="DESCRIPTIONdsadswwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwadasdsadsadsad AWITTTTT",text_color='#000000',font=ctk.CTkFont(size=15))
-        self.speechToSignDesc.grid(pady=8, padx=20, row=1,column=1,sticky='nswe')
+        self.speechToSignDesc = ctk.CTkLabel(master=self.mainFrame_speechToSignGroup,wraplength=int(((self.window_width * .80)/2)-30), text="DESCRIPTIONdsadswwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwadasdsadsadsad AWITTTTT",text_color=self.color.black,font=ctk.CTkFont(size=15))
+        self.speechToSignDesc.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=1,column=1,sticky='nswe')
         self.speechToSignDesc.bind('<Button-1>', self.speechToSign)
                 #####BOTTOM FRAME#####
-        self.bottomFrame = ctk.CTkFrame(master=self, fg_color="#D9D9D9", width = self.window_width, height= self.window_height * .049, corner_radius=0, border_width=0)
+        self.bottomFrame = ctk.CTkFrame(master=self, fg_color=self.color.very_light_gray, width = self.window_width, height= self.window_height * .049, corner_radius=0, border_width=0)
         self.bottomFrame.grid(row=1, column=0, sticky='sew', padx=0, pady=0, columnspan=2)
         #self.overrideredirect(True)
         self.signToText_window = None
