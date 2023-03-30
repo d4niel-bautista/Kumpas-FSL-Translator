@@ -5,7 +5,8 @@ from PIL import Image, ImageTk
 from color import Color
 from sign_to_text import SignToText
 from speech_to_sign import SpeechToSign
-from canvas_vid import CanvasVideoPlayer
+from canvas_video_player import CanvasVideoPlayer
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -86,16 +87,11 @@ class App(ctk.CTk):
         self.signToTextDesc.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=1,column=1,sticky='nswe')
         self.signToTextDesc.bind('<Button-1>', self.signToText)
         
-        # self.canvas = ctk.CTkCanvas(master=self.mainFrame_signToText, highlightthickness=0, width = self.window_width * .80)
+        # self.canvas = Canvas(master=self.mainFrame_signToText, highlightthickness=0, width = self.window_width * .80)
         # self.video = CanvasVideoPlayer(self.canvas,'test.mp4', refresh_rate=0.01)
         # self.video.start()
-        # # self.lblVideo = Label(self.canvas, borderwidth=0)
-        # # self.lblVideo.grid(pady=0, padx=0, row=0,column=0,sticky='news', ipadx=0,ipady=0)
-        
         # self.canvas.grid(row=0, column=0, padx=0, pady=0, sticky='news')
-        # self.canvas.create_text(300, 50, text="HELLO WORLD", fill="black", font=('Helvetica 15 bold'))
-        # self.signToTextLogoLabel = ctk.CTkLabel(master=self.mainFrame_signToText,text=" SIGN TO TEXT", text_color='#000000',font=ctk.CTkFont(size=25))
-        # self.signToTextLogoLabel.grid(pady=8, padx=20, row=0,column=0,sticky='nswe')
+
 
         
         
@@ -104,22 +100,18 @@ class App(ctk.CTk):
         self.mainFrame_speechToSign = ctk.CTkFrame(master=self.mainFrame, fg_color=self.color.white, width = self.window_width * .80, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
         self.mainFrame_speechToSign.grid(row=1, column=0, sticky='nesw', padx=0, pady=0)
         self.mainFrame_speechToSign.grid_propagate(False)
-        self.mainFrame_speechToSign.grid_columnconfigure((0,1),weight=1)
+        self.mainFrame_speechToSign.grid_columnconfigure(0,weight=1)
         
-        # self.lblVideo1 = Canvas(self.mainFrame_speechToSign, borderwidth=0)
-        # self.lblVideo1.grid(pady=0, padx=0, row=0,column=0, sticky='news', ipadx=0,ipady=0)
-        
-        self.mainFrame_speechToSignGroup = ctk.CTkFrame(master=self.mainFrame_speechToSign,fg_color=self.color.white, width = (self.window_width * .80)/2, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
-        self.mainFrame_speechToSignGroup.grid(row=0, column=1, sticky='nsew', padx=0, pady=0)
-        self.mainFrame_speechToSignGroup.grid_propagate(False)
-        self.mainFrame_speechToSignGroup.bind('<Button-1>', self.speechToSign)
-        self.speechToSignLogo = ctk.CTkImage(Image.open(self.current_path + "/img/speech-sign.png"), size=(self.window_width * .0533,self.window_height * .0914))
-        self.speechToSignLogoLabel = ctk.CTkLabel(master=self.mainFrame_speechToSignGroup, image=self.speechToSignLogo, text="SPEECH TO SIGN ", compound='right',text_color=self.color.black,font=ctk.CTkFont(size=25))
-        self.speechToSignLogoLabel.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=0,column=1,sticky='nswe')
-        self.speechToSignLogoLabel.bind('<Button-1>', self.speechToSign)
-        self.speechToSignDesc = ctk.CTkLabel(master=self.mainFrame_speechToSignGroup,wraplength=int(((self.window_width * .80)/2)-30), text="DESCRIPTIONdsadswwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwadasdsadsadsad AWITTTTT",text_color=self.color.black,font=ctk.CTkFont(size=15))
-        self.speechToSignDesc.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=1,column=1,sticky='nswe')
-        self.speechToSignDesc.bind('<Button-1>', self.speechToSign)
+        self.lblVideo1 = Canvas(self.mainFrame_speechToSign, borderwidth=0,highlightthickness=0, height= (self.window_height * .758)/2)
+        self.lblVideo1.grid(pady=0, padx=0, row=0,column=0, sticky='news', ipadx=0,ipady=0)
+        self.player1 = CanvasVideoPlayer(canvas=self.lblVideo1, video_path='slow.mp4', img_path='img/speech-sign.png', vid_size=(1000,1000),
+                                         img_pos=(600,50), img_size=(64,64),
+                                         text_pos=(700,60), text="SPEE\nCH TO S\nIGN", font='Helvetica 19',
+                                         desc_pos=(700, 100), desc_text="wow", desc_font='Helvetica 19' )
+        self.player1.play()
+        # self.player1.add_image('img/speech-sign.png', (64,64), 600, 50)
+        self.lblVideo1.bind('<Button-1>', self.speechToSign)
+       
                 #####BOTTOM FRAME#####
         self.bottomFrame = ctk.CTkFrame(master=self, fg_color=self.color.very_light_gray, width = self.window_width, height= self.window_height * .049, corner_radius=0, border_width=0)
         self.bottomFrame.grid(row=1, column=0, sticky='sew', padx=0, pady=0, columnspan=2)
