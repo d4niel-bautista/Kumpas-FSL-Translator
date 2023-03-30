@@ -112,11 +112,13 @@ class App(ctk.CTk):
             self.signToText_window = SignToText(self)  # create window if its None or destroyed
             self.withdraw()
             self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
+            self.signToText_window.start_camera.start()
             
         else:
             self.signToText_window.focus()  # if window exists focus it
             self.withdraw()
             self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
+            self.signToText_window.start_camera.start()
 
 
     def speechToSign(self,a):
@@ -124,10 +126,12 @@ class App(ctk.CTk):
             self.speechToSign_window = SpeechToSign(self)  # create window if its None or destroyed
             self.withdraw()
             self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
+            # self.speechToSign_window.start_camera.start()
         else:
             self.speechToSign_window.focus()  # if window exists focus it
             self.withdraw()
             self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
+            # self.speechToSign_window.start_camera.start()
 
     def clicked_speechToSign(self):
         self.deiconify()
