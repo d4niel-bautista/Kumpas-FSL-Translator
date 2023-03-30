@@ -3,9 +3,11 @@ import customtkinter as ctk
 import os
 from PIL import Image, ImageTk
 from color import Color
-from sign_to_text import SignToText
-from speech_to_sign import SpeechToSign
+# from sign_to_text import SignToText
+# from speech_to_sign import SpeechToSign
 from canvas_video_player import CanvasVideoPlayer
+import sys
+from subprocess import Popen, PIPE
 
 class App(ctk.CTk):
     def __init__(self):
@@ -108,38 +110,43 @@ class App(ctk.CTk):
         #self.overrideredirect(1)
 
     def signToText(self,a):
-        if self.signToText_window is None or not self.signToText_window.winfo_exists():
-            self.signToText_window = SignToText(self)  # create window if its None or destroyed
-            self.withdraw()
-            self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
-            self.signToText_window.start_camera.start()
+        # if self.signToText_window is None or not self.signToText_window.winfo_exists():
+        #     self.signToText_window = SignToText(self)  # create window if its None or destroyed
+        #     self.withdraw()
+        #     self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
+        #     self.signToText_window.start_camera.start()
             
-        else:
-            self.signToText_window.focus()  # if window exists focus it
-            self.withdraw()
-            self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
-            self.signToText_window.start_camera.start()
+        # else:
+        #     self.signToText_window.focus()  # if window exists focus it
+        #     self.withdraw()
+        #     self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
+        #     self.signToText_window.start_camera.start()
+        p = Popen(["py","sign_recog.py"], stdin=PIPE, stdout=PIPE)
+        # pass
 
 
     def speechToSign(self,a):
-        if self.speechToSign_window is None or not self.speechToSign_window.winfo_exists():
-            self.speechToSign_window = SpeechToSign(self)  # create window if its None or destroyed
-            self.withdraw()
-            self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
+        # if self.speechToSign_window is None or not self.speechToSign_window.winfo_exists():
+        #     self.speechToSign_window = SpeechToSign(self)  # create window if its None or destroyed
+        #     self.withdraw()
+        #     self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
+        #     # self.speechToSign_window.start_camera.start()
+        # else:
+        #     self.speechToSign_window.focus()  # if window exists focus it
+        #     self.withdraw()
+        #     self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
             # self.speechToSign_window.start_camera.start()
-        else:
-            self.speechToSign_window.focus()  # if window exists focus it
-            self.withdraw()
-            self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
-            # self.speechToSign_window.start_camera.start()
+        pass
 
     def clicked_speechToSign(self):
-        self.deiconify()
-        self.speechToSign_window.destroy()
+        # self.deiconify()
+        # self.speechToSign_window.destroy()
+        pass
     
     def clicked_signToText(self):
-        self.deiconify()
-        self.signToText_window.destroy()
+        # self.deiconify()
+        # self.signToText_window.destroy()
+        pass
         
 
 

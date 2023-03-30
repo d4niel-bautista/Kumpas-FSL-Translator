@@ -60,7 +60,6 @@ class SpeechToSign(ctk.CTkToplevel):
         pose_one_frame = deque(maxlen=1)
         lh_one_frame = deque(maxlen=1)
         rh_one_frame = deque(maxlen=1)
-        print('test')
         ret, image = self.cap.read()
 
         if not ret:
