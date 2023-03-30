@@ -25,7 +25,7 @@ class SignToText(ctk.CTkToplevel):
         self.titleFrame.grid_columnconfigure(1, weight=1)
         self.current_path = os.path.dirname(os.path.realpath(__file__))
         self.returnImg = ctk.CTkImage(Image.open(self.current_path + "/img/return.png"), size=(50,50))
-        self.returnBtn = ctk.CTkButton(master=self.titleFrame, image=self.returnImg, command=self.destroy, text="", fg_color=self.color.transparent, width=self.window_width * .015, height=self.window_height * .0588, border_width=0)
+        self.returnBtn = ctk.CTkButton(master=self.titleFrame, image=self.returnImg, text="", fg_color=self.color.transparent, width=self.window_width * .015, height=self.window_height * .0588, border_width=0)
         self.returnBtn.grid(row=0, column=0,sticky='wns', padx=self.window_width * .0083, pady=(self.window_height * .13)/8)
         self.signToTextLogo = ctk.CTkImage(Image.open(self.current_path + "/img/sign-text.png"), size=(self.window_width * .0533,self.window_height * .0914))
         self.signToTextLogoLabel = ctk.CTkLabel(master=self.titleFrame, image=self.signToTextLogo, text=" SIGN TO TEXT", compound='left',text_color=self.color.black,font=ctk.CTkFont(size=25))

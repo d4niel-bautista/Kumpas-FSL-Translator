@@ -1,4 +1,4 @@
-from tkinter import *
+import tkinter as tk
 import customtkinter as ctk
 import os
 from PIL import Image, ImageTk
@@ -68,68 +68,75 @@ class App(ctk.CTk):
         self.mainFrame = ctk.CTkFrame(master=self.rightFrame, fg_color=self.color.white, width = self.window_width * .80, height= self.window_height * .758, corner_radius=0, border_width=0)
         self.mainFrame.grid(row=1, column=0, sticky='news', padx=0, pady=0)
         self.mainFrame.grid_propagate(False)
-                #####MAIN FRAME - SIGN TO TEXT#####
-                
+                #####MAIN FRAME - SIGN TO TEXT#####  
         self.mainFrame_signToText = ctk.CTkFrame(master=self.mainFrame, fg_color=self.color.white, width = self.window_width * .80, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
         self.mainFrame_signToText.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
         self.mainFrame_signToText.grid_propagate(False)
-        self.mainFrame_signToText.grid_columnconfigure((0,1),weight=1)
+        self.mainFrame_signToText.grid_columnconfigure(0,weight=1)
 
-        self.mainFrame_signToTextGroup = ctk.CTkFrame(master=self.mainFrame_signToText, fg_color=self.color.transparent, width = (self.window_width * .80)/2, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
-        self.mainFrame_signToTextGroup.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
-        self.mainFrame_signToTextGroup.grid_propagate(False)
-        self.mainFrame_signToTextGroup.bind('<Button-1>', self.signToText)
-        self.signToTextLogo = ctk.CTkImage(Image.open(self.current_path + "/img/sign-text.png"), size=(self.window_width * .0533,self.window_height * .0914))
-        self.signToTextLogoLabel = ctk.CTkLabel(master=self.mainFrame_signToTextGroup, image=self.signToTextLogo, text=" SIGN TO TEXT", compound='left',text_color=self.color.black,font=ctk.CTkFont(size=25))
-        self.signToTextLogoLabel.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=0,column=1,sticky='nswe')
-        self.signToTextLogoLabel.bind('<Button-1>', self.signToText)
-        self.signToTextDesc = ctk.CTkLabel(master=self.mainFrame_signToTextGroup,wraplength=int(((self.window_width * .80)/2)-30), fg_color=self.color.transparent,text="IT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXTIT IS USED TO TRANSLATE FILIPINO SIGN LAdasdsadsadsadNGUAGE TO TEXT",text_color=self.color.black,font=ctk.CTkFont(size=15))
-        self.signToTextDesc.grid(pady=self.window_height * .0114, padx=self.window_width * .01666, row=1,column=1,sticky='nswe')
-        self.signToTextDesc.bind('<Button-1>', self.signToText)
-        
-        # self.canvas = Canvas(master=self.mainFrame_signToText, highlightthickness=0, width = self.window_width * .80)
-        # self.video = CanvasVideoPlayer(self.canvas,'test.mp4', refresh_rate=0.01)
-        # self.video.start()
-        # self.canvas.grid(row=0, column=0, padx=0, pady=0, sticky='news')
+        self.lblVideo = ctk.CTkCanvas(self.mainFrame_signToText, borderwidth=0,highlightthickness=0,bg='black', height= (self.window_height * .758)/2)
+        self.lblVideo.grid(pady=0, padx=0, row=0,column=0, sticky='news', ipadx=0,ipady=0)
+        self.player = CanvasVideoPlayer(canvas=self.lblVideo, video_path='videos/test.mp4', img_path='img/sign-text.png', 
+                                        vid_size=(int(self.window_width * .80),int((self.window_height * .758)/2)), vid_pos=(0,0),
+                                        img_pos=((self.window_width * .80)*.4,((self.window_height * .758)/2)*.131926), img_size=(64,64),
+                                        text_pos=((self.window_width * .80)*.27,((self.window_height * .758)/2)*.18846), text="SIGN TO TEXT", font='Helvetica 19 bold',
+                                        desc_pos=((self.window_width * .80)*.303,((self.window_height * .758)/2)* .5277), desc_text="Sign language to text\ntranslation is a process\nof converting sign language\ninto written text.", desc_font='Helvetica 19')
+        self.player.play()
+        self.lblVideo.bind('<Button-1>', self.signToText)
 
-
-        
-        
-        
                 #####MAIN FRAME - SPEECH TO SIGN#####
         self.mainFrame_speechToSign = ctk.CTkFrame(master=self.mainFrame, fg_color=self.color.white, width = self.window_width * .80, height= (self.window_height * .758)/2, corner_radius=0, border_width=0)
         self.mainFrame_speechToSign.grid(row=1, column=0, sticky='nesw', padx=0, pady=0)
         self.mainFrame_speechToSign.grid_propagate(False)
         self.mainFrame_speechToSign.grid_columnconfigure(0,weight=1)
         
-        self.lblVideo1 = Canvas(self.mainFrame_speechToSign, borderwidth=0,highlightthickness=0, height= (self.window_height * .758)/2)
+        self.lblVideo1 = ctk.CTkCanvas(self.mainFrame_speechToSign, borderwidth=0,highlightthickness=0, height= (self.window_height * .758)/2)
         self.lblVideo1.grid(pady=0, padx=0, row=0,column=0, sticky='news', ipadx=0,ipady=0)
-        self.player1 = CanvasVideoPlayer(canvas=self.lblVideo1, video_path='slow.mp4', img_path='img/speech-sign.png', vid_size=(1000,1000),
-                                         img_pos=(600,50), img_size=(64,64),
-                                         text_pos=(700,60), text="SPEE\nCH TO S\nIGN", font='Helvetica 19',
-                                         desc_pos=(700, 100), desc_text="wow", desc_font='Helvetica 19' )
+        self.player1 = CanvasVideoPlayer(canvas=self.lblVideo1, video_path='videos/slow.mp4', img_path='img/speech-sign.png',
+                                         vid_size=(int(self.window_width * .80),int((self.window_height * .758)/2)), vid_pos=(0,0),
+                                         img_pos=((self.window_width * .80) *.5729,((self.window_height * .758)/2) * .15077), img_size=(64,64),
+                                         text_pos=((self.window_width * .80) * .72916,((self.window_height * .758)/2) * .18846), text="SPEECH TO SIGN", font='Helvetica 19 bold',
+                                         desc_pos=((self.window_width * .80) * .7,((self.window_height * .758)/2) * .5277), desc_text="Speech to sign translation\nuses speech recognition\ntechnology to convert spoken\nwords into animation.", desc_font='Helvetica 19' )
         self.player1.play()
-        # self.player1.add_image('img/speech-sign.png', (64,64), 600, 50)
         self.lblVideo1.bind('<Button-1>', self.speechToSign)
        
                 #####BOTTOM FRAME#####
         self.bottomFrame = ctk.CTkFrame(master=self, fg_color=self.color.very_light_gray, width = self.window_width, height= self.window_height * .049, corner_radius=0, border_width=0)
         self.bottomFrame.grid(row=1, column=0, sticky='sew', padx=0, pady=0, columnspan=2)
-        #self.overrideredirect(True)
         self.signToText_window = None
         self.speechToSign_window = None
+        #self.overrideredirect(1)
 
     def signToText(self,a):
         if self.signToText_window is None or not self.signToText_window.winfo_exists():
             self.signToText_window = SignToText(self)  # create window if its None or destroyed
+            self.withdraw()
+            self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
+            
         else:
             self.signToText_window.focus()  # if window exists focus it
+            self.withdraw()
+            self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
+
 
     def speechToSign(self,a):
         if self.speechToSign_window is None or not self.speechToSign_window.winfo_exists():
             self.speechToSign_window = SpeechToSign(self)  # create window if its None or destroyed
+            self.withdraw()
+            self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
         else:
             self.speechToSign_window.focus()  # if window exists focus it
+            self.withdraw()
+            self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
+
+    def clicked_speechToSign(self):
+        self.deiconify()
+        self.speechToSign_window.destroy()
+    
+    def clicked_signToText(self):
+        self.deiconify()
+        self.signToText_window.destroy()
+        
 
 
 
