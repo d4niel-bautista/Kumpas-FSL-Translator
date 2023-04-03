@@ -2,7 +2,7 @@ import os
 from PIL import Image, ImageTk
 import customtkinter as ctk
 from color import Color
-from sign_recog import SignTextTranslator
+from sign_text import SignTextTranslator
 import cv2
 from collections import deque
 import copy

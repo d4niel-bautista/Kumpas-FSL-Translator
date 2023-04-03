@@ -7,6 +7,7 @@ import copy
 import itertools
 import numpy as np
 from collections import deque, Counter
+import screeninfo
 
 face_expre_recog = FacialExpressionRecognition()
 hand_pose_recog = HandPoseRecognition()
@@ -32,6 +33,9 @@ pose = mp_pose.Pose(min_detection_confidence=0.5,
 
 pose_zeros = [0.0] * 99
 hand_zeros = [0.0] * 42
+
+screen = screeninfo.get_monitors()[0]
+width, height = screen.width//2, screen.height//2
 
 with open('data/face/face_expre_labels.csv',
     encoding='utf-8-sig') as f:
@@ -439,6 +443,9 @@ use_brect = True
 hand_pose_pred = deque(maxlen=30)
 predictions_list = deque(maxlen=10)
 output_list = deque([''], maxlen=5)
+
+cv.namedWindow('KUMPAS FSL TRANSLATOR', cv.WINDOW_NORMAL)
+cv.moveWindow('KUMPAS FSL TRANSLATOR', width - (cap_width//2), height - (cap_height//2))
 while True:
     pose_one_frame = deque(maxlen=1)
     lh_one_frame = deque(maxlen=1)

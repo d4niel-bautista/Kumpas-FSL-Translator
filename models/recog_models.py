@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import numpy as np
 import tensorflow as tf
 from keras.models import Sequential
@@ -9,7 +7,7 @@ import os
 class FacialExpressionRecognition(object):
     def __init__(
         self,
-        model_path='weights/face_expre_weights.tflite',
+        model_path='models/weights/face_expre_weights.tflite',
         num_threads=4,
     ):
         self.interpreter = tf.lite.Interpreter(model_path=model_path,
@@ -43,7 +41,7 @@ class FacialExpressionRecognition(object):
 class HandPoseRecognition(object):
     def __init__(
         self,
-        model_path='weights/hand_pose_weights.tflite',
+        model_path='models/weights/hand_pose_weights.tflite',
         num_threads=4,
     ):
         self.interpreter = tf.lite.Interpreter(model_path=model_path,
@@ -73,8 +71,7 @@ class HandPoseRecognition(object):
 class BodySequenceRecognition(object):
     def __init__(
         self,
-        model_path='weights/body_sequence_weights.h5',
-        num_threads=4,
+        model_path='models/weights/body_sequence_weights.h5'
     ):
         # self.interpreter = tf.lite.Interpreter(model_path=model_path,
         #                                        num_threads=num_threads)
