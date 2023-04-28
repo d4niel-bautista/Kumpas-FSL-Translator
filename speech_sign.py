@@ -11,7 +11,7 @@ from direct.interval.IntervalGlobal import *
 from direct.actor.Actor import Actor
 import threading
 
-class PandaTest(Panda3DWorld):
+class SpeechSign(Panda3DWorld):
     
     anims = {
                 'Alin': 'Animations/Alin-rigAction.egg',
@@ -99,7 +99,7 @@ class PandaTest(Panda3DWorld):
         text = ''
         while True:
             try:
-                with sr.Microphone() as mic:
+                with sr.Microphone(2) as mic:
                     r.adjust_for_ambient_noise(mic, 0.2)
                     audio = r.record(mic, duration=4)
                     text = r.recognize_google(audio)
@@ -143,8 +143,8 @@ class PandaTest(Panda3DWorld):
         sys.exit(self.app.exec_())
 
 if __name__ == "__main__":    
-    z = PandaTest()
-    z.main()
+    speech_sign = SpeechSign()
+    speech_sign.main()
 
         
         
