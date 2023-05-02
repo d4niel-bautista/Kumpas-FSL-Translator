@@ -1,11 +1,11 @@
 import customtkinter as ctk
 import shutil
-from models.recog_models import BodySequenceRecognition, HandPoseRecognition, FacialExpressionRecognition
 import train_func
 from PIL import Image
 import numpy as np
 import os
 import csv
+import threading
 np.set_printoptions(threshold=np.inf)
 
 class SignToTextGUI(ctk.CTk):
@@ -65,6 +65,8 @@ class SignToTextGUI(ctk.CTk):
         self.train_btn.grid(column=1, pady=4)
         self.status_label = ctk.CTkLabel(self, anchor='center', text='', wraplength=180)
         self.status_label.grid(column=1, pady=8)
+        self.clear_output_btn = ctk.CTkButton(self, text='Clear Output', width=75, fg_color='#ECECEC', hover_color='#D5D5D5', text_color='#333333', command=self.main_app.clear_output)
+        self.clear_output_btn.place(relx=0.038, rely=0.932)
         self.body_seq_init()
     
     def sign_dropdown(self, value):
@@ -123,6 +125,7 @@ class SignToTextGUI(ctk.CTk):
     def delete_body_seq(self):
         for i in self.to_delete_body_seq:
             shutil.rmtree("data/body_sequence/" + i)
+        self.to_delete_body_seq = []
     
     def hand_pose_delete(self, x):
         if len(self.hand_pose_labels) == 1:
@@ -175,19 +178,30 @@ class SignToTextGUI(ctk.CTk):
         self.face_expre_init()
     
     def train(self):
-        value = self.sign_menu_var.get()
-        if value == 'Body Gesture':
-            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
-        elif value == 'Hand Pose':
-            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
-        elif value == 'Facial Expression':
-            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
         for i in self.gui_scrll_frame.winfo_children():
             i.configure(state='disabled')
         for j in self.bot_frame.winfo_children():
             j.configure(state='disabled')
         self.sign_menu.configure(state='disabled')
         self.train_btn.configure(state='disabled')
+        
+        value = self.sign_menu_var.get()
+        if value == 'Body Gesture':
+            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
+            self.update()
+            self.delete_body_seq()
+            x = threading.Thread(target=train_func.train_lstm, args=(self,))
+            x.start()
+        elif value == 'Hand Pose':
+            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
+            self.update()
+            y = threading.Thread(target=train_func.train_hand_pose, args=(self,))
+            y.start()
+        elif value == 'Facial Expression':
+            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
+            self.update()
+            z = threading.Thread(target=train_func.train_face_expre, args=(self,))
+            z.start()
     
     def add_new_dialog(self):
         frame_add_new = ctk.CTkToplevel(self)
@@ -214,6 +228,7 @@ class SignToTextGUI(ctk.CTk):
             return
         if self.sign_menu_var.get() == 'Body Gesture':
             self.body_seq_labels.append(entry.get().lower())
+            self.main_app.body_seq.labels.append(entry.get().lower())
             self.body_seq_init()
         elif self.sign_menu_var.get() == 'Hand Pose':
             self.hand_pose_labels.append(entry.get().title())

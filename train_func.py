@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from collections import deque
+from models.recog_models import BodySequenceRecognition, HandPoseRecognition, FacialExpressionRecognition
 from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 from keras.layers import InputLayer, Dense, Dropout, LSTM
@@ -11,9 +11,9 @@ import csv
 
 RANDOM_SEED = 42
 
-def train_lstm():
-    shutil.rmtree('data/body_sequence')
-    shutil.copytree('temp/body_sequence', 'data/body_sequence')
+def train_lstm(app):
+    for i in os.listdir('temp/body_sequence'):
+        shutil.copytree(os.path.join('temp/body_sequence', i), os.path.join('data/body_sequence', i))
     sequence = []
     label = []
     path = 'data/body_sequence'
@@ -61,7 +61,20 @@ def train_lstm():
         callbacks=[cp_callback, es_callback]
     )
 
-def train_hand_pose():
+    for i in app.gui_scrll_frame.winfo_children():
+        i.configure(state='normal')
+    for j in app.bot_frame.winfo_children():
+        j.configure(state='normal')
+    app.sign_menu.configure(state='normal')
+    app.train_btn.configure(state='normal')
+    app.status_label.configure(text='')
+    app.main_app.body_seq.recog_model = BodySequenceRecognition()
+    app.main_app.body_seq.labels = app.main_app.body_seq.get_labels()
+    app.word_var.set(0)
+    app.update()
+    app.main_app.clear_output()
+
+def train_hand_pose(app):
     shutil.rmtree('data/hand')
     shutil.copytree('temp/hand', 'data/hand')
     dataset = 'data/hand/hand_pose_data.csv'
@@ -70,7 +83,7 @@ def train_hand_pose():
     with open('data/hand/hand_pose_labels.csv',
             encoding='utf-8-sig') as g:
             hand_pose_labels = csv.reader(g)
-            NUM_CLASSES = [row[0] for row in hand_pose_labels]
+            NUM_CLASSES = len([row[0] for row in hand_pose_labels])
     X_dataset = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(1, (21 * 2) + 1)))
     y_dataset = np.loadtxt(dataset, delimiter=',', dtype='int32', usecols=(0))
     X_train, X_test, y_train, y_test = train_test_split(X_dataset, y_dataset, train_size=0.75, random_state=RANDOM_SEED)
@@ -121,7 +134,20 @@ def train_hand_pose():
 
     open(tflite_save_path, 'wb').write(tflite_quantized_model)
 
-def train_face_expre():
+    for i in app.gui_scrll_frame.winfo_children():
+        i.configure(state='normal')
+    for j in app.bot_frame.winfo_children():
+        j.configure(state='normal')
+    app.sign_menu.configure(state='normal')
+    app.train_btn.configure(state='normal')
+    app.status_label.configure(text='')
+    app.main_app.hand_pose.recog_model = HandPoseRecognition()
+    app.main_app.hand_pose.labels = app.main_app.hand_pose.get_labels()
+    app.word_var.set(0)
+    app.update()
+    app.main_app.clear_output()
+
+def train_face_expre(app):
     shutil.rmtree('data/face')
     shutil.copytree('temp/face', 'data/face')
     dataset = 'data/face/face_expre_data.csv'
@@ -130,7 +156,7 @@ def train_face_expre():
     with open('data/face/face_expre_labels.csv',
             encoding='utf-8-sig') as g:
             face_expre_labels = csv.reader(g)
-            NUM_CLASSES = [row[0] for row in face_expre_labels]
+            NUM_CLASSES = len([row[0] for row in face_expre_labels])
     X_dataset = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(1, (478 * 2) + 1)))
     y_dataset = np.loadtxt(dataset, delimiter=',', dtype='int32', usecols=(0))
     X_train, X_test, y_train, y_test = train_test_split(X_dataset, y_dataset, train_size=0.8, random_state=RANDOM_SEED)
@@ -183,3 +209,16 @@ def train_face_expre():
     tflite_quantized_model = converter.convert()
 
     open(tflite_save_path, 'wb').write(tflite_quantized_model)
+
+    for i in app.gui_scrll_frame.winfo_children():
+        i.configure(state='normal')
+    for j in app.bot_frame.winfo_children():
+        j.configure(state='normal')
+    app.sign_menu.configure(state='normal')
+    app.train_btn.configure(state='normal')
+    app.status_label.configure(text='')
+    app.main_app.face_expre.recog_model = FacialExpressionRecognition()
+    app.main_app.face_expre.labels = app.main_app.face_expre.get_labels()
+    app.word_var.set(0)
+    app.update()
+    app.main_app.clear_output()
