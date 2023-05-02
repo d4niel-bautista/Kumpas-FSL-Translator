@@ -16,6 +16,7 @@ class FaceRecog(BaseRecognitionClass):
                         min_detection_confidence=0.5,
                         min_tracking_confidence=0.5)
         self.draw_landmarks = True
+        self.collect_data = False
     
     def get_labels(self):
         with open('data/face/face_expre_labels.csv',

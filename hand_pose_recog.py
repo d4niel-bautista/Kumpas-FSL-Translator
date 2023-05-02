@@ -16,6 +16,7 @@ class HandPoseRecog(BaseRecognitionClass):
                     min_tracking_confidence=0.5)
         self.draw_landmarks = True
         self.zeros = [0.0] * 42
+        self.collect_data = False
 
     def get_labels(self):
         with open('data/hand/hand_pose_labels.csv',

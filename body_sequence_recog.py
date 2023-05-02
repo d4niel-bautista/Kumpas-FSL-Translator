@@ -15,6 +15,7 @@ class BodySequenceRecog(BaseRecognitionClass):
         self.pose_detection_threshold = 0.5
         self.zeros = [0.0] * 99
         self.draw_landmarks = True
+        self.collect_data = False
     
     def get_labels(self):
         return os.listdir('data/body_sequence')

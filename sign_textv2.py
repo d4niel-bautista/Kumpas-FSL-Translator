@@ -8,6 +8,8 @@ from face_recog import FaceRecog
 from hand_pose_recog import HandPoseRecog
 import threading
 from gui_sign_to_text import SignToText
+import shutil
+import csv
 
 class SignText():
     def __init__(self):
@@ -19,6 +21,7 @@ class SignText():
         self.width, self.height = self.screen.width//2, self.screen.height//2
         self.cap_width = 640
         self.cap_height = 480
+        self.to_add_data_idx = None
 
     def calc_bounding_rect(self, image, landmarks):
         image_width, image_height = image.shape[1], image.shape[0]
@@ -68,11 +71,11 @@ class SignText():
 
         max_frames = 20
         pose_sequence = deque(maxlen=max_frames)
-        block_hand_recog = False
+        block_hand_recog = 0
         block_pos_recog = 0
 
-        hand_pose_pred = deque(maxlen=10)
-        body_seq_pred = deque(maxlen=5)
+        hand_pose_pred = deque(maxlen=25)
+        body_seq_pred = deque(maxlen=6)
         output_list = deque([''], maxlen=5)
         window_name = 'KUMPAS FSL TRANSLATOR'
 
@@ -120,12 +123,12 @@ class SignText():
                     sign_id, lstm_proba = self.body_seq.recog_model(pose_sequence)
                     if lstm_proba >= 80:
                         if self.body_seq.labels[sign_id] != 'error':
-                            block_hand_recog = True
+                            block_hand_recog = 8
                             print(self.body_seq.labels[sign_id], lstm_proba)
                             body_seq_pred.append(self.body_seq.labels[sign_id])
                     else:
                         print(self.body_seq.labels[sign_id], lstm_proba)
-                        block_hand_recog = False
+                        # block_hand_recog = 0
             
             if face_mesh_res.multi_face_landmarks is not None:
                 for face_landmarks in face_mesh_res.multi_face_landmarks:
@@ -152,7 +155,7 @@ class SignText():
                         preprocessed_hand_landmarks = self.hand_pose.preprocess_landmarks(
                             hand_landmark_list, handedness.classification[0].label)
                         debug_image = self.hand_pose.draw_connections(debug_image, hand_landmark_list)
-                        if not block_hand_recog:
+                        if block_hand_recog == 0:
                             hand_sign_id = self.hand_pose.recog_model(preprocessed_hand_landmarks)
 
                             hand_rect = self.calc_bounding_rect(debug_image, hand_landmarks)
@@ -170,12 +173,13 @@ class SignText():
                         else:
                             rh_one_frame.append(preprocessed_hand_landmarks)
                             lh_one_frame.append(self.hand_pose.zeros)
-                        # if self.hand_pose.labels[hand_sign_id] != 'Error':
-                        #     block_pos_recog = 4
                         if self.hand_pose.labels[hand_sign_id] != 'Error' and self.hand_pose.labels[hand_sign_id] != 'Finger heart':
+                            block_pos_recog = 6
+                            print(self.hand_pose.labels[hand_sign_id])
                             hand_pose_pred.append(self.hand_pose.labels[hand_sign_id])
                         else:
-                            block_hand_recog = True
+                            if not block_hand_recog > 0:
+                                block_hand_recog = 8
                 elif len(hand_pose_res.multi_handedness) == 2:
                     for hand_landmarks, handedness in zip(hand_pose_res.multi_hand_landmarks,
                                                         hand_pose_res.multi_handedness):
@@ -184,7 +188,7 @@ class SignText():
                         preprocessed_hand_landmarks = self.hand_pose.preprocess_landmarks(
                             hand_landmark_list, handedness.classification[0].label)
                         debug_image = self.hand_pose.draw_connections(debug_image, hand_landmark_list)
-                        if not block_hand_recog:
+                        if block_hand_recog == 0:
                             hand_sign_id = self.hand_pose.recog_model(preprocessed_hand_landmarks)
 
                             hand_rect = self.calc_bounding_rect(debug_image, hand_landmarks)
@@ -195,18 +199,17 @@ class SignText():
                                 hand_rect,
                                 handedness,
                                 self.hand_pose.labels[hand_sign_id])
-                            if self.hand_pose.labels[hand_sign_id] != 'Error' and self.hand_pose.labels[hand_sign_id] != 'Finger heart':
-                                hand_pose_pred.append(self.hand_pose.labels[hand_sign_id])
                         if handedness.classification[0].label == "Left":
                             lh_one_frame.append(preprocessed_hand_landmarks)
                         else:
                             rh_one_frame.append(preprocessed_hand_landmarks)
-                        # if self.hand_pose.labels[hand_sign_id] != 'Error':
-                        #     block_pos_recog = 4
                         if self.hand_pose.labels[hand_sign_id] != 'Error' and self.hand_pose.labels[hand_sign_id] != 'Finger heart':
+                            print(self.hand_pose.labels[hand_sign_id])
+                            block_pos_recog = 6
                             hand_pose_pred.append(self.hand_pose.labels[hand_sign_id])
                         else:
-                            block_hand_recog = True
+                            if not block_hand_recog > 0:
+                                block_hand_recog = 8
             else:
                 rh_one_frame.append(self.hand_pose.zeros)
                 lh_one_frame.append(self.hand_pose.zeros)
@@ -223,6 +226,7 @@ class SignText():
                 pose_sequence.clear()
             
             if cv.getWindowProperty(window_name, cv.WND_PROP_VISIBLE) < 1:
+                print('exited')
                 break
 
             cv.rectangle(debug_image, (0, 450), (640,480), (255,255,255), -1)
@@ -241,17 +245,21 @@ class SignText():
                 most_common_hand_pose = Counter(hand_pose_pred).most_common()
                 if len(output_list) != 0:
                     if most_common_hand_pose[0][0] == 'Error' or most_common_hand_pose[0][0] == 'Finger heart':
-                        # hand_pose_pred.clear()
-                        block_hand_recog = True
+                        hand_pose_pred.clear()
+                        # block_hand_recog = 8
+                        pass
                     elif most_common_hand_pose[0][0] == output_list[-1]:
                         pass
                     else:
                         output_list.append(most_common_hand_pose[0][0])
-                        # body_seq_pred.clear()
-                        block_pos_recog = 3
+                        body_seq_pred.clear()
+                        block_pos_recog = 6
                         hand_pose_pred.clear()
+
             debug_image = self.draw_output_list(debug_image, output_list)
             cv.imshow(window_name, debug_image)
+            
+            # print(block_pos_recog, block_hand_recog, hand_pose_pred)
 
             if len(pose_one_frame) == 0:
                 pose_one_frame.append(self.body_seq.zeros)
@@ -264,10 +272,23 @@ class SignText():
             pose_sequence.append(pose_one_frame[0])
             if block_pos_recog > 0:
                 block_pos_recog -= 1
+            if block_hand_recog > 0:
+                block_hand_recog -= 1
+            
+            if self.face_expre.collect_data:
+                with open("temp/face/face_expre_data.csv", 'a', newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([self.to_add_data_idx, *preprocessed_face_landmarks])
+            
+            if self.hand_pose.collect_data:
+                with open("temp/hand/hand_pose_data.csv", 'a', newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([self.to_add_data_idx, *preprocessed_hand_landmarks])
 
         cv.destroyAllWindows()
         cap.release()
-        
+        shutil.rmtree('temp')
+        return
 
 if __name__ == "__main__":    
     sign_text = SignText()
