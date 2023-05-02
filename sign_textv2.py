@@ -17,6 +17,8 @@ class SignText():
 
         self.screen = screeninfo.get_monitors()[0]
         self.width, self.height = self.screen.width//2, self.screen.height//2
+        self.cap_width = 640
+        self.cap_height = 480
 
     def calc_bounding_rect(self, image, landmarks):
         image_width, image_height = image.shape[1], image.shape[0]
@@ -50,16 +52,19 @@ class SignText():
             cv.FONT_HERSHEY_DUPLEX, 0.9, (255, 255, 255), 2, cv.LINE_AA)
         return image
     
-    def start_gui(self, x, y, object):
-        gui = SignToText(x=x, y=y, object=object)
+    def start_thread(self):
+        gui_thread = threading.Thread(target=self.start_gui, args=(self.width + 8 + (self.cap_width//2), self.height - (self.cap_height//2), self), daemon=True)
+        gui_thread.start()
+
+    def start_gui(self, x, y, main_app):
+        gui = SignToText(x=x, y=y, main_app=main_app)
         gui.mainloop()
     
     def main(self):
-        cap_width = 640
-        cap_height = 480
+        
         cap = cv.VideoCapture(0)
-        cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
-        cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
+        cap.set(cv.CAP_PROP_FRAME_WIDTH, self.cap_width)
+        cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.cap_height)
 
         max_frames = 20
         pose_sequence = deque(maxlen=max_frames)
@@ -67,13 +72,14 @@ class SignText():
         block_pos_recog = 0
 
         hand_pose_pred = deque(maxlen=10)
-        predictions_list = deque(maxlen=5)
+        body_seq_pred = deque(maxlen=5)
         output_list = deque([''], maxlen=5)
+        window_name = 'KUMPAS FSL TRANSLATOR'
 
-        cv.namedWindow('KUMPAS FSL TRANSLATOR', cv.WINDOW_NORMAL)
-        cv.moveWindow('KUMPAS FSL TRANSLATOR', self.width - (cap_width//2), self.height - (cap_height//2))
-        gui_thread = threading.Thread(target=self.start_gui, args=(self.width + (cap_width//2) + 1, self.height - (cap_height//2), self), daemon=True)
-        gui_thread.start()
+        cv.namedWindow(window_name)
+        cv.moveWindow(window_name, self.width - (self.cap_width//2), self.height - (self.cap_height//2))
+        cv.setWindowProperty(window_name, cv.WND_PROP_TOPMOST, 1)
+        self.start_thread()
         while True:
             pose_one_frame = deque(maxlen=1)
             lh_one_frame = deque(maxlen=1)
@@ -116,8 +122,9 @@ class SignText():
                         if self.body_seq.labels[sign_id] != 'error':
                             block_hand_recog = True
                             print(self.body_seq.labels[sign_id], lstm_proba)
-                            predictions_list.append(self.body_seq.labels[sign_id])
+                            body_seq_pred.append(self.body_seq.labels[sign_id])
                     else:
+                        print(self.body_seq.labels[sign_id], lstm_proba)
                         block_hand_recog = False
             
             if face_mesh_res.multi_face_landmarks is not None:
@@ -163,10 +170,12 @@ class SignText():
                         else:
                             rh_one_frame.append(preprocessed_hand_landmarks)
                             lh_one_frame.append(self.hand_pose.zeros)
-                        if self.hand_pose.labels[hand_sign_id] != 'Error':
-                            block_pos_recog = 4
+                        # if self.hand_pose.labels[hand_sign_id] != 'Error':
+                        #     block_pos_recog = 4
                         if self.hand_pose.labels[hand_sign_id] != 'Error' and self.hand_pose.labels[hand_sign_id] != 'Finger heart':
                             hand_pose_pred.append(self.hand_pose.labels[hand_sign_id])
+                        else:
+                            block_hand_recog = True
                 elif len(hand_pose_res.multi_handedness) == 2:
                     for hand_landmarks, handedness in zip(hand_pose_res.multi_hand_landmarks,
                                                         hand_pose_res.multi_handedness):
@@ -192,8 +201,12 @@ class SignText():
                             lh_one_frame.append(preprocessed_hand_landmarks)
                         else:
                             rh_one_frame.append(preprocessed_hand_landmarks)
-                        if self.hand_pose.labels[hand_sign_id] != 'Error':
-                            block_pos_recog = 4
+                        # if self.hand_pose.labels[hand_sign_id] != 'Error':
+                        #     block_pos_recog = 4
+                        if self.hand_pose.labels[hand_sign_id] != 'Error' and self.hand_pose.labels[hand_sign_id] != 'Finger heart':
+                            hand_pose_pred.append(self.hand_pose.labels[hand_sign_id])
+                        else:
+                            block_hand_recog = True
             else:
                 rh_one_frame.append(self.hand_pose.zeros)
                 lh_one_frame.append(self.hand_pose.zeros)
@@ -206,34 +219,40 @@ class SignText():
 
             if key == 32:
                 output_list.clear()
-                predictions_list.append('')
+                output_list.append('')
                 pose_sequence.clear()
+            
+            if cv.getWindowProperty(window_name, cv.WND_PROP_VISIBLE) < 1:
+                break
 
             cv.rectangle(debug_image, (0, 450), (640,480), (255,255,255), -1)
-            if len(predictions_list) == 10:
-                most_common_lstm = Counter(predictions_list).most_common()
+            if len(body_seq_pred) == body_seq_pred.maxlen:
+                most_common_lstm = Counter(body_seq_pred).most_common()
                 if len(output_list) != 0:
                     if most_common_lstm[0][0] == output_list[-1]:
                         pass
                     else:
                         output_list.append(most_common_lstm[0][0])
-                        predictions_list.clear()
+                        body_seq_pred.clear()
+                        pose_sequence.clear()
                         hand_pose_pred.clear()
-            if len(hand_pose_pred) == 30:
+
+            if len(hand_pose_pred) == hand_pose_pred.maxlen:
                 most_common_hand_pose = Counter(hand_pose_pred).most_common()
                 if len(output_list) != 0:
                     if most_common_hand_pose[0][0] == 'Error' or most_common_hand_pose[0][0] == 'Finger heart':
-                        hand_pose_pred.clear()
+                        # hand_pose_pred.clear()
                         block_hand_recog = True
                     elif most_common_hand_pose[0][0] == output_list[-1]:
                         pass
                     else:
                         output_list.append(most_common_hand_pose[0][0])
-                        predictions_list.clear()
+                        # body_seq_pred.clear()
+                        block_pos_recog = 3
                         hand_pose_pred.clear()
-            self.draw_output_list(debug_image, output_list)
-            # print(output_list)
-            cv.imshow('KUMPAS FSL TRANSLATOR', debug_image)
+            debug_image = self.draw_output_list(debug_image, output_list)
+            cv.imshow(window_name, debug_image)
+
             if len(pose_one_frame) == 0:
                 pose_one_frame.append(self.body_seq.zeros)
             if len(lh_one_frame) == 0:
@@ -243,12 +262,12 @@ class SignText():
             pose_one_frame[0].extend(lh_one_frame[0])
             pose_one_frame[0].extend(rh_one_frame[0])
             pose_sequence.append(pose_one_frame[0])
-
             if block_pos_recog > 0:
                 block_pos_recog -= 1
 
-        cap.release()
         cv.destroyAllWindows()
+        cap.release()
+        
 
 if __name__ == "__main__":    
     sign_text = SignText()

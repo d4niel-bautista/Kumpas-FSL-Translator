@@ -125,7 +125,11 @@ class App(ctk.CTk):
         #     self.withdraw()
         #     self.signToText_window.returnBtn.configure(command=self.clicked_signToText)
         #     self.signToText_window.start_camera.start()
-        sign_text = Popen(["py","sign_text.py"], stdin=PIPE, stdout=PIPE)
+        with Popen(["py", "sign_textv2.py"], stdout=PIPE, bufsize=1,
+           universal_newlines=True) as p:
+            for line in p.stdout:
+                print(line, end='')
+        # sign_text = Popen(["py","sign_textv2.py"], stdin=PIPE, stdout=PIPE)
 
     def speechToSign(self,a):
         # if self.speechToSign_window is None or not self.speechToSign_window.winfo_exists():
@@ -138,17 +142,7 @@ class App(ctk.CTk):
         #     self.withdraw()
         #     self.speechToSign_window.returnBtn.configure(command=self.clicked_speechToSign)
             # self.speechToSign_window.start_camera.start()
-        speech_sign = Popen(["py","speech_sign.py"], stdin=PIPE, stdout=PIPE)
-
-    def clicked_speechToSign(self):
-        # self.deiconify()
-        # self.speechToSign_window.destroy()
-        pass
-    
-    def clicked_signToText(self):
-        # self.deiconify()
-        # self.signToText_window.destroy()
-        pass
+        speech_sign = Popen(["py","speech_signv2.py"], stdin=PIPE, stdout=PIPE)
         
 if __name__ == "__main__":
     app = App()
