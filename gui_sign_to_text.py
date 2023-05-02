@@ -8,7 +8,7 @@ import os
 import csv
 np.set_printoptions(threshold=np.inf)
 
-class SignToText(ctk.CTk):
+class SignToTextGUI(ctk.CTk):
     def __init__(self, x, y, main_app):
         super().__init__()
         self.h = 480+32
@@ -44,7 +44,7 @@ class SignToText(ctk.CTk):
         self.gui_bg.grid(column=1, pady=(5,2))
         self.frame_label = ctk.CTkLabel(self.gui_bg, text=self.sign_menu_var.get(), fg_color='transparent')
         self.frame_label.grid(column=1, pady=1)
-        self.gui_scrll_frame = ctk.CTkScrollableFrame(self.gui_bg, width=180, corner_radius=0, height=280)
+        self.gui_scrll_frame = ctk.CTkScrollableFrame(self.gui_bg, width=180, corner_radius=0, height=250)
         self.gui_scrll_frame.grid_columnconfigure((0,3), weight=1)
         self.gui_scrll_frame.grid(column=1)
 
@@ -63,8 +63,9 @@ class SignToText(ctk.CTk):
         self.collect_data_btn.grid(row=0, column=2, sticky='w')
         self.train_btn = ctk.CTkButton(self, text="TRAIN", command=self.train)
         self.train_btn.grid(column=1, pady=4)
+        self.status_label = ctk.CTkLabel(self, anchor='center', text='', wraplength=180)
+        self.status_label.grid(column=1, pady=8)
         self.body_seq_init()
-        self.create_temp_folders()
     
     def sign_dropdown(self, value):
         self.frame_label.configure(text=self.sign_menu_var.get())
@@ -75,11 +76,6 @@ class SignToText(ctk.CTk):
             self.hand_pose_init()
         elif value == 'Facial Expression':
             self.face_expre_init()
-    
-    def create_temp_folders(self):
-        for i in os.listdir('data'):
-            if not os.path.exists(os.path.join('temp', i)):
-                os.makedirs(os.path.join('temp', i))
             
     def body_seq_init(self):
         for i in self.gui_scrll_frame.winfo_children():
@@ -135,22 +131,17 @@ class SignToText(ctk.CTk):
             tmp_hp = np.loadtxt('temp/hand/hand_pose_data.csv', delimiter=',', usecols=list(range((21 * 2) + 1)), dtype='object')
             tmp_hp[:, 0] = tmp_hp[:, 0].astype(int)
             tmp_hp[:, 1:] = tmp_hp[:, 1:].astype(float)
-        else:
-            tmp_hp = np.loadtxt('data/hand/hand_pose_data.csv', delimiter=',', usecols=list(range((21 * 2) + 1)), dtype='object')
-            tmp_hp[:, 0] = tmp_hp[:, 0].astype(int)
-            tmp_hp[:, 1:] = tmp_hp[:, 1:].astype(float)
+
         if not x == len(self.hand_pose_labels) - 1:
             tmp_hp = tmp_hp[(tmp_hp[:, 0] != x)]
             tmp_hp_copy = tmp_hp.copy()
             np.subtract(1, tmp_hp[:, 0], out=tmp_hp[:, 0], where=tmp_hp_copy[:, 0] > x)
             tmp_hp[:, 0] = abs(tmp_hp[:, 0])
-            # np.save("temp/hand/hand_pose_data.csv", tmp_hp)
-            np.savetxt("temp/hand/hand_pose_data.csv",tmp_hp,delimiter=',', fmt='%s')
+            np.savetxt("temp/hand/hand_pose_data.csv", tmp_hp, delimiter=',', fmt='%s')
         else:
             tmp_hp = tmp_hp[(tmp_hp[:, 0] != x)]
             tmp_hp[:, 0] = abs(tmp_hp[:, 0])
-            # np.save("temp/hand/hand_pose_data.csv", tmp_hp)
-            np.savetxt("temp/hand/hand_pose_data.csv",tmp_hp,delimiter=',', fmt='%s')
+            np.savetxt("temp/hand/hand_pose_data.csv", tmp_hp, delimiter=',', fmt='%s')
         self.hand_pose_labels.pop(x)
         with open('temp/hand/hand_pose_labels.csv', 'w', newline='') as file:
             writer = csv.writer(file)
@@ -165,22 +156,17 @@ class SignToText(ctk.CTk):
             tmp_fe = np.loadtxt('temp/face/face_expre_data.csv', delimiter=',', usecols=list(range((478 * 2) + 1)), dtype='object')
             tmp_fe[:, 0] = tmp_fe[:, 0].astype(int)
             tmp_fe[:, 1:] = tmp_fe[:, 1:].astype(float)
-        else:
-            tmp_fe = np.loadtxt('data/face/face_expre_data.csv', delimiter=',', usecols=list(range((478 * 2) + 1)), dtype='object')
-            tmp_fe[:, 0] = tmp_fe[:, 0].astype(int)
-            tmp_fe[:, 1:] = tmp_fe[:, 1:].astype(float)
+
         if not x == len(self.face_expre_labels) - 1:
             tmp_fe = tmp_fe[(tmp_fe[:, 0] != x)]
             tmp_fe_copy = tmp_fe.copy()
             np.subtract(1, tmp_fe[:, 0], out=tmp_fe[:, 0], where=tmp_fe_copy[:, 0] > x)
             tmp_fe[:, 0] = abs(tmp_fe[:, 0])
-            # np.save("temp/face/face_expre_data.npy", tmp_fe)
-            np.savetxt("temp/face/face_expre_data.csv",tmp_fe,delimiter=',', fmt=('%s, %f'))
+            np.savetxt("temp/face/face_expre_data.csv", tmp_fe, delimiter=',', fmt='%s')
         else:
             tmp_fe = tmp_fe[(tmp_fe[:, 0] != x)]
             tmp_fe[:, 0] = abs(tmp_fe[:, 0])
-            # np.save("temp/face/face_expre_data.npy", tmp_fe)
-            np.savetxt("temp/face/face_expre_data.csv",tmp_fe,delimiter=',', fmt=('%s, %f'))
+            np.savetxt("temp/face/face_expre_data.csv", tmp_fe, delimiter=',', fmt='%s')
         self.face_expre_labels.pop(x)
         with open('temp/face/face_expre_labels.csv', 'w', newline='') as file:
             writer = csv.writer(file)
@@ -189,6 +175,13 @@ class SignToText(ctk.CTk):
         self.face_expre_init()
     
     def train(self):
+        value = self.sign_menu_var.get()
+        if value == 'Body Gesture':
+            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
+        elif value == 'Hand Pose':
+            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
+        elif value == 'Facial Expression':
+            self.status_label.configure(text='Currently training for:\n' + value + ' Recognition')
         for i in self.gui_scrll_frame.winfo_children():
             i.configure(state='disabled')
         for j in self.bot_frame.winfo_children():
@@ -198,28 +191,60 @@ class SignToText(ctk.CTk):
     
     def add_new_dialog(self):
         frame_add_new = ctk.CTkToplevel(self)
-        frame_add_new.attributes('-topmost',True)
-        frame_add_new.geometry(f"{200//2}x{170//2}+{self.screen_width//2}+{self.screen_height//1.9}")
+        frame_add_new.geometry(f"{200}x{120}+{self.screen_width//2 - 200//2}+{self.screen_height//1.9 - 120//2}")
         frame_add_new.grid_propagate(False)
         frame_add_new.grid_columnconfigure((0,2), weight=1)
+        frame_add_new.overrideredirect(True)
         frame_add_new.grab_set()
-        add_new_label = ctk.CTkLabel(frame_add_new, text='Enter a new word to add:', fg_color='transparent')
-        add_new_label.grid(column=1, pady=1)
+        frame_add_new.attributes('-topmost',True)
+        add_new_label = ctk.CTkLabel(frame_add_new, text='Enter a new word/sign to add:', fg_color='transparent', wraplength=180)
+        add_new_label.grid(column=1, pady=(10,2))
         new_word_entry = ctk.CTkEntry(frame_add_new)
         new_word_entry.grid(column=1)
         bot_frame = ctk.CTkFrame(frame_add_new, fg_color='transparent')
-        bot_frame.grid(column=1, columnspan=2, sticky='nsew')
+        bot_frame.grid(column=1, pady=10)
         bot_frame.grid_columnconfigure((0,3), weight=1)
-        add_btn = ctk.CTkButton(bot_frame, text='Add', width=35)
-        add_btn.grid(row=0, column=1, sticky='e', padx=(0,5))
-        cancel_btn = ctk.CTkButton(bot_frame, text='Cancel', width=75)
-        cancel_btn.grid(row=0, column=2, sticky='w')
+        add_btn = ctk.CTkButton(bot_frame, text='Add', width=35, command=lambda x=new_word_entry, z=frame_add_new:self.add_word(x, z))
+        add_btn.grid(row=0, column=1, sticky='e', padx=3)
+        cancel_btn = ctk.CTkButton(bot_frame, text='Cancel', width=60, command=frame_add_new.destroy)
+        cancel_btn.grid(row=0, column=2, sticky='w', padx=3)
     
-    def add_word(self, word):
-        pass
-
+    def add_word(self, entry, window):
+        if entry.get() == '':
+            return
+        if self.sign_menu_var.get() == 'Body Gesture':
+            self.body_seq_labels.append(entry.get().lower())
+            self.body_seq_init()
+        elif self.sign_menu_var.get() == 'Hand Pose':
+            self.hand_pose_labels.append(entry.get().title())
+            with open('temp/hand/hand_pose_labels.csv', 'w', newline='') as file:
+                writer = csv.writer(file)
+                for i in self.hand_pose_labels:
+                    writer.writerow([i])
+            self.hand_pose_init()
+        elif self.sign_menu_var.get() == 'Facial Expression':
+            self.face_expre_labels.append(entry.get().title())
+            with open('temp/face/face_expre_labels.csv', 'w', newline='') as file:
+                writer = csv.writer(file)
+                for i in self.face_expre_labels:
+                    writer.writerow([i])
+            self.face_expre_init()
+        window.destroy()
     
     def collect_data(self):
+        idx = self.word_var.get()
+        self.main_app.to_add_data_idx = idx
+
+        if self.sign_menu_var.get() == 'Body Gesture':
+            self.main_app.body_seq.collect_data = not self.main_app.body_seq.collect_data
+            self.status_label.configure(text='Currently collecting data for:\n' + self.body_seq_labels[idx])
+        elif self.sign_menu_var.get() == 'Hand Pose':
+            self.main_app.hand_pose.collect_data = not self.main_app.hand_pose.collect_data
+            self.status_label.configure(text='Currently collecting data for:\n' + self.hand_pose_labels[idx])
+        elif self.sign_menu_var.get() == 'Facial Expression':
+            self.main_app.face_expre.collect_data = not self.main_app.face_expre.collect_data
+            self.status_label.configure(text='Currently collecting data for:\n' + self.face_expre_labels[idx])
+
         if self.collect_data_btn.cget('text') == 'Collect Data':
             self.sign_menu.configure(state='disabled')
             self.add_btn.configure(state='disabled')
@@ -234,16 +259,7 @@ class SignToText(ctk.CTk):
                 i.configure(state='normal')
             self.train_btn.configure(state='normal')
             self.collect_data_btn.configure(fg_color=self.add_btn.cget('fg_color'), text='Collect Data')
-        self.main_app.to_add_data_idx = self.word_var.get()
-        if self.sign_menu_var.get() == 'Body Gesture':
-            self.main_app.body_seq.collect_data = not self.main_app.body_seq.collect_data
-            print(self.main_app.body_seq.collect_data)
-        elif self.sign_menu_var.get() == 'Hand Pose':
-            self.main_app.hand_pose.collect_data = not self.main_app.hand_pose.collect_data
-            print(self.main_app.hand_pose.collect_data)
-        elif self.sign_menu_var.get() == 'Facial Expression':
-            self.main_app.face_expre.collect_data = not self.main_app.face_expre.collect_data
-            print(self.main_app.face_expre.collect_data)
-        
+            self.status_label.configure(text='')
+       
         
         

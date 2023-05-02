@@ -7,9 +7,10 @@ from body_sequence_recog import BodySequenceRecog
 from face_recog import FaceRecog
 from hand_pose_recog import HandPoseRecog
 import threading
-from gui_sign_to_text import SignToText
+from gui_sign_to_text import SignToTextGUI
 import shutil
 import csv
+import os
 
 class SignText():
     def __init__(self):
@@ -60,11 +61,20 @@ class SignText():
         gui_thread.start()
 
     def start_gui(self, x, y, main_app):
-        gui = SignToText(x=x, y=y, main_app=main_app)
+        gui = SignToTextGUI(x=x, y=y, main_app=main_app)
         gui.mainloop()
+
+    def create_temp(self):
+        if os.path.exists('temp'):
+            shutil.rmtree('temp')
+        for i in os.listdir('data'):
+            if i == 'body_sequence':
+                os.makedirs(os.path.join('temp', i))
+                continue
+            shutil.copytree(os.path.join('data', i), os.path.join('temp', i))
     
     def main(self):
-        
+        self.create_temp()
         cap = cv.VideoCapture(0)
         cap.set(cv.CAP_PROP_FRAME_WIDTH, self.cap_width)
         cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.cap_height)
@@ -133,9 +143,14 @@ class SignText():
             if face_mesh_res.multi_face_landmarks is not None:
                 for face_landmarks in face_mesh_res.multi_face_landmarks:
                     face_landmark_list = self.face_expre.calc_landmarks(debug_image, face_landmarks)
-
                     
                     preprocessed_face_landmarks = self.face_expre.preprocess_landmarks(face_landmark_list)
+
+                    if self.face_expre.collect_data:
+                        with open("temp/face/face_expre_data.csv", 'a', newline="") as f:
+                            writer = csv.writer(f)
+                            writer.writerow([self.to_add_data_idx, *preprocessed_face_landmarks])
+                    
                     facial_emotion_id = self.face_expre.recog_model(preprocessed_face_landmarks)
                     debug_image = self.face_expre.draw_connections(debug_image, face_landmark_list)
                     if self.face_expre.labels[facial_emotion_id] != "Neutral":
@@ -154,6 +169,12 @@ class SignText():
                         hand_landmark_list = self.hand_pose.calc_landmarks(debug_image, hand_landmarks)
                         preprocessed_hand_landmarks = self.hand_pose.preprocess_landmarks(
                             hand_landmark_list, handedness.classification[0].label)
+                        
+                        if self.hand_pose.collect_data:
+                            with open("temp/hand/hand_pose_data.csv", 'a', newline="") as f:
+                                writer = csv.writer(f)
+                                writer.writerow([self.to_add_data_idx, *preprocessed_hand_landmarks])
+                        
                         debug_image = self.hand_pose.draw_connections(debug_image, hand_landmark_list)
                         if block_hand_recog == 0:
                             hand_sign_id = self.hand_pose.recog_model(preprocessed_hand_landmarks)
@@ -175,10 +196,9 @@ class SignText():
                             lh_one_frame.append(self.hand_pose.zeros)
                         if self.hand_pose.labels[hand_sign_id] != 'Error' and self.hand_pose.labels[hand_sign_id] != 'Finger heart':
                             block_pos_recog = 6
-                            print(self.hand_pose.labels[hand_sign_id])
                             hand_pose_pred.append(self.hand_pose.labels[hand_sign_id])
                         else:
-                            if not block_hand_recog > 0:
+                            if block_hand_recog == 0:
                                 block_hand_recog = 8
                 elif len(hand_pose_res.multi_handedness) == 2:
                     for hand_landmarks, handedness in zip(hand_pose_res.multi_hand_landmarks,
@@ -187,6 +207,12 @@ class SignText():
                         hand_landmark_list = self.hand_pose.calc_landmarks(debug_image, hand_landmarks)
                         preprocessed_hand_landmarks = self.hand_pose.preprocess_landmarks(
                             hand_landmark_list, handedness.classification[0].label)
+                        
+                        if self.hand_pose.collect_data:
+                            with open("temp/hand/hand_pose_data.csv", 'a', newline="") as f:
+                                writer = csv.writer(f)
+                                writer.writerow([self.to_add_data_idx, *preprocessed_hand_landmarks])
+
                         debug_image = self.hand_pose.draw_connections(debug_image, hand_landmark_list)
                         if block_hand_recog == 0:
                             hand_sign_id = self.hand_pose.recog_model(preprocessed_hand_landmarks)
@@ -204,11 +230,10 @@ class SignText():
                         else:
                             rh_one_frame.append(preprocessed_hand_landmarks)
                         if self.hand_pose.labels[hand_sign_id] != 'Error' and self.hand_pose.labels[hand_sign_id] != 'Finger heart':
-                            print(self.hand_pose.labels[hand_sign_id])
                             block_pos_recog = 6
                             hand_pose_pred.append(self.hand_pose.labels[hand_sign_id])
                         else:
-                            if not block_hand_recog > 0:
+                            if block_hand_recog == 0:
                                 block_hand_recog = 8
             else:
                 rh_one_frame.append(self.hand_pose.zeros)
@@ -275,19 +300,12 @@ class SignText():
             if block_hand_recog > 0:
                 block_hand_recog -= 1
             
-            if self.face_expre.collect_data:
-                with open("temp/face/face_expre_data.csv", 'a', newline="") as f:
-                    writer = csv.writer(f)
-                    writer.writerow([self.to_add_data_idx, *preprocessed_face_landmarks])
             
-            if self.hand_pose.collect_data:
-                with open("temp/hand/hand_pose_data.csv", 'a', newline="") as f:
-                    writer = csv.writer(f)
-                    writer.writerow([self.to_add_data_idx, *preprocessed_hand_landmarks])
+            
+            
 
         cv.destroyAllWindows()
         cap.release()
-        shutil.rmtree('temp')
         return
 
 if __name__ == "__main__":    
