@@ -1,32 +1,60 @@
 import os
-from PIL import Image, ImageTk
 import customtkinter as ctk
-from color import Color
-import cv2
-from collections import deque
-import copy
-import threading
-from direct.actor.Actor import Actor
+from tkinter import Frame
+from PIL import Image
 
-class SpeechToSign(ctk.CTk):
-    def __init__(self, x, y):
-        super().__init__()
-        self.h = 480
-        self.w = 220
-        self.x = x
-        self.y = y
-        self.title('OPTIONS')
-        
-        for i in range(5):
-            btn = ctk.CTkButton(self, text=i)
-            btn.grid()
-            print('x')
+class SpeechToSignGUI():
+    def __init__(self, app):
+        self.app = app
+        self.app.main_gui.grid_columnconfigure((0,1), weight=1)
 
-        self.geometry(f"{self.w}x{self.h}+{self.x}+{self.y}")
-        self.grid_propagate(False)
-        self.grab_set()
+        self.panda_frame_height = 510
+        self.panda_frame = Frame(self.app.main_gui, bg="red", height=self.panda_frame_height, width=self.app.w)
+        self.panda_frame.grid(row=0, column=0, sticky='nsew')
 
+        self.bottom_frame = ctk.CTkFrame(self.app.main_gui, fg_color="transparent", corner_radius=0)
+        self.bottom_frame.grid_propagate(False)
+        self.bottom_frame.grid(row=1, column=0, sticky='nsew')
+        self.bottom_frame.grid_columnconfigure(0, weight=1)
 
-x = SpeechToSign(100,100)
-x.mainloop()
+        self.mic_icon = ctk.CTkImage(Image.open("img/mic.png"), size=(64, 64))
+        self.mic_recording = ctk.CTkImage(Image.open("img/mic_recording.png"), size=(64, 64))
+        self.mic_hover = ctk.CTkImage(Image.open("img/mic_hover.png"), size=(64, 64))
+        self.record_btn = ctk.CTkButton(self.bottom_frame, background_corner_colors=None, bg_color='transparent', hover=None, height=69, width=69, corner_radius=0, text='', image=self.mic_icon, fg_color='transparent', border_width=0, command=self.record_clicked)
+        self.record_btn.grid_propagate(False)
+        self.record_btn.grid(row=1, column=0, pady=2)
+        self.record_btn.bind("<Enter>", self.hover_effect)
+        self.record_btn.bind("<Leave>", self.hover_remove)
+        self.clicked_record = False
+        self.text_font = ctk.CTkFont(family="Calibri", size=26)
+        self.text_string = ctk.CTkLabel(self.bottom_frame, anchor='w', text='', font=self.text_font, text_color="black")
+        self.text_string.grid(row=2, column=0, padx=30)
+
+        self.options_frame = ctk.CTkFrame(self.app.main_gui, fg_color="#333333", corner_radius=0, width=self.app.extra - self.app.w, height=self.app.h)
+        self.options_frame.grid(row=0, column=1, rowspan=2, sticky='nsew')
+        self.options_frame.grid_propagate(False)
+        self.options_frame.grid_columnconfigure(0, weight=1)
+
+        self.clear_output_btn = ctk.CTkButton(self.options_frame, text='Clear Output', width=75, fg_color='#ECECEC', hover_color='#D5D5D5', text_color='#333333')
+        self.clear_output_btn.place(relx=0.0376, rely=0.8244)
+    
+    def hover_effect(self, e):
+        self.record_btn.configure(image=self.mic_hover)
+
+    def hover_remove(self, e):
+        self.record_btn.configure(image=self.mic_icon)
+    
+    def record_clicked(self):
+        if not self.clicked_record:
+            self.clicked_record = True
+            self.record_btn.unbind("<Enter>")
+            self.record_btn.unbind("<Leave>")
+            self.record_btn.configure(image=self.mic_recording, state='disabled')
+            self.app.record_clicked()
+    
+    def reset_mic_btn(self):
+        self.clicked_record = False
+        self.record_btn.configure(image=self.mic_icon, state='normal')
+        self.record_btn.bind("<Enter>", self.hover_effect)
+        self.record_btn.bind("<Leave>", self.hover_remove)
     

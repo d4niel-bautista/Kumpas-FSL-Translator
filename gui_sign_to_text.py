@@ -25,10 +25,6 @@ class SignToTextGUI(ctk.CTk):
         self.grab_set()
         self.overrideredirect(True)
         self.attributes('-topmost',True)
-        
-        self.sign_menu_var = ctk.StringVar(value="Body Gesture")
-        self.sign_menu = ctk.CTkOptionMenu(self, values=['Body Gesture', 'Hand Pose', 'Facial Expression'], variable=self.sign_menu_var, command=self.sign_dropdown, anchor='c')
-        self.sign_menu.grid(column=1, pady=(14,4))
 
         self.body_seq_labels = self.main_app.body_seq.get_labels()
         self.hand_pose_labels = self.main_app.hand_pose.get_labels()
@@ -42,8 +38,9 @@ class SignToTextGUI(ctk.CTk):
 
         self.gui_bg = ctk.CTkFrame(self, width=180)
         self.gui_bg.grid(column=1, pady=(5,2))
-        self.frame_label = ctk.CTkLabel(self.gui_bg, text=self.sign_menu_var.get(), fg_color='transparent')
-        self.frame_label.grid(column=1, pady=1)
+        self.sign_menu_var = ctk.StringVar(value="Body Gesture")
+        self.sign_menu = ctk.CTkOptionMenu(self.gui_bg, values=['Body Gesture', 'Hand Pose', 'Facial Expression'], variable=self.sign_menu_var, command=self.sign_dropdown, anchor='c')
+        self.sign_menu.grid(column=1, pady=4)
         self.gui_scrll_frame = ctk.CTkScrollableFrame(self.gui_bg, width=180, corner_radius=0, height=250)
         self.gui_scrll_frame.grid_columnconfigure((0,3), weight=1)
         self.gui_scrll_frame.grid(column=1)
@@ -70,7 +67,6 @@ class SignToTextGUI(ctk.CTk):
         self.body_seq_init()
     
     def sign_dropdown(self, value):
-        self.frame_label.configure(text=self.sign_menu_var.get())
         self.word_var.set(0)
         if value == 'Body Gesture':
             self.body_seq_init()
@@ -116,15 +112,17 @@ class SignToTextGUI(ctk.CTk):
             delete_face_expre_label.grid(row=i, column=2, sticky='e')
 
     def body_seq_delete(self, x):
-        if len(self.body_seq_labels) == 1:
+        if len(self.body_seq_labels) == 1 or self.main_app.frames > 0:
             return
         self.body_seq_labels.remove(x)
         self.to_delete_body_seq.append(x)
+        self.word_var.set(0)
         self.body_seq_init()
     
     def delete_body_seq(self):
         for i in self.to_delete_body_seq:
-            shutil.rmtree("data/body_sequence/" + i)
+            if os.path.exists(os.path.join("data/body_sequence/", i)):
+                shutil.rmtree("data/body_sequence/" + i)
         self.to_delete_body_seq = []
     
     def hand_pose_delete(self, x):
@@ -150,6 +148,7 @@ class SignToTextGUI(ctk.CTk):
             writer = csv.writer(file)
             for i in self.hand_pose_labels:
                 writer.writerow([i])
+        self.word_var.set(0)
         self.hand_pose_init()
 
     def face_expre_delete(self, x):
@@ -175,6 +174,7 @@ class SignToTextGUI(ctk.CTk):
             writer = csv.writer(file)
             for i in self.face_expre_labels:
                 writer.writerow([i])
+        self.word_var.set(0)
         self.face_expre_init()
     
     def train(self):
@@ -222,6 +222,7 @@ class SignToTextGUI(ctk.CTk):
         add_btn.grid(row=0, column=1, sticky='e', padx=3)
         cancel_btn = ctk.CTkButton(bot_frame, text='Cancel', width=60, command=frame_add_new.destroy)
         cancel_btn.grid(row=0, column=2, sticky='w', padx=3)
+        new_word_entry.focus_set()
     
     def add_word(self, entry, window):
         if entry.get() == '':
@@ -250,17 +251,20 @@ class SignToTextGUI(ctk.CTk):
         idx = self.word_var.get()
         self.main_app.to_add_data_idx = idx
 
-        if self.sign_menu_var.get() == 'Body Gesture':
-            self.main_app.body_seq.collect_data = not self.main_app.body_seq.collect_data
-            self.status_label.configure(text='Currently collecting data for:\n' + self.body_seq_labels[idx])
-        elif self.sign_menu_var.get() == 'Hand Pose':
-            self.main_app.hand_pose.collect_data = not self.main_app.hand_pose.collect_data
-            self.status_label.configure(text='Currently collecting data for:\n' + self.hand_pose_labels[idx])
-        elif self.sign_menu_var.get() == 'Facial Expression':
-            self.main_app.face_expre.collect_data = not self.main_app.face_expre.collect_data
-            self.status_label.configure(text='Currently collecting data for:\n' + self.face_expre_labels[idx])
-
         if self.collect_data_btn.cget('text') == 'Collect Data':
+            if self.main_app.frames > 0:
+                return
+            
+            if self.sign_menu_var.get() == 'Body Gesture':
+                self.main_app.body_seq.collect_data = True
+                self.status_label.configure(text='Currently collecting data for:\n' + self.body_seq_labels[idx])
+            elif self.sign_menu_var.get() == 'Hand Pose':
+                self.main_app.hand_pose.collect_data = True
+                self.status_label.configure(text='Currently collecting data for:\n' + self.hand_pose_labels[idx])
+            elif self.sign_menu_var.get() == 'Facial Expression':
+                self.main_app.face_expre.collect_data = True
+                self.status_label.configure(text='Currently collecting data for:\n' + self.face_expre_labels[idx])
+            
             self.sign_menu.configure(state='disabled')
             self.add_btn.configure(state='disabled')
             for i in self.gui_scrll_frame.winfo_children():
@@ -268,6 +272,10 @@ class SignToTextGUI(ctk.CTk):
             self.train_btn.configure(state='disabled')
             self.collect_data_btn.configure(fg_color='red3', text='STOP')
         elif self.collect_data_btn.cget('text') == 'STOP':
+            self.main_app.body_seq.collect_data = False
+            self.main_app.hand_pose.collect_data = False
+            self.main_app.face_expre.collect_data = False
+
             self.sign_menu.configure(state='normal')
             self.add_btn.configure(state='normal')
             for i in self.gui_scrll_frame.winfo_children():

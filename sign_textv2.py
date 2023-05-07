@@ -99,6 +99,7 @@ class SignText():
         cv.namedWindow(window_name)
         cv.moveWindow(window_name, self.width - (self.cap_width//2), self.height - (self.cap_height//2))
         cv.setWindowProperty(window_name, cv.WND_PROP_TOPMOST, 1)
+        self.frames = 0
         self.start_thread()
         while True:
             pose_one_frame = deque(maxlen=1)
@@ -106,16 +107,19 @@ class SignText():
             rh_one_frame = deque(maxlen=1)
 
             while self.body_seq.collect_data:
-                path = os.path.join('temp', 'body_sequence', self.body_seq.labels[self.to_add_data_idx])
+                path = os.path.join('temp', 'body_sequence', self.gui.body_seq_labels[self.to_add_data_idx])
                 if not os.path.exists(path):
                     os.makedirs(path)
                 
-                if self.body_seq.labels[self.to_add_data_idx] in self.gui.to_delete_body_seq and self.body_seq.labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')):
+                if self.gui.body_seq_labels[self.to_add_data_idx] in self.gui.to_delete_body_seq and self.gui.body_seq_labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')):
                     reps = len(os.listdir(path))
-                elif self.body_seq.labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')) and self.body_seq.labels[self.to_add_data_idx] not in self.gui.to_delete_body_seq and os.path.exists(path):
-                    reps = len(os.listdir(path)) + len(os.listdir(os.path.join('data', 'body_sequence', self.body_seq.labels[self.to_add_data_idx])))
-                elif self.body_seq.labels[self.to_add_data_idx] not in self.gui.to_delete_body_seq and self.body_seq.labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')):
-                    reps = len(os.listdir(os.path.join('data', 'body_sequence', self.body_seq.labels[self.to_add_data_idx])))
+                elif self.gui.body_seq_labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')) and self.gui.body_seq_labels[self.to_add_data_idx] not in self.gui.to_delete_body_seq and os.path.exists(path):
+                    reps = len(os.listdir(path)) + len(os.listdir(os.path.join('data', 'body_sequence', self.gui.body_seq_labels[self.to_add_data_idx])))
+                elif self.gui.body_seq_labels[self.to_add_data_idx] not in self.gui.to_delete_body_seq and self.gui.body_seq_labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')):
+                    reps = len(os.listdir(os.path.join('data', 'body_sequence', self.gui.body_seq_labels[self.to_add_data_idx])))
+                else:
+                    reps = len(os.listdir(path))
+                    
                 while True:
                     if os.path.exists(os.path.join(path, str(reps))):
                         reps += 1
@@ -124,8 +128,7 @@ class SignText():
                         os.makedirs(os.path.join(path, str(reps)))
                         break
                 
-                frames = 0
-                while frames < max_frames:
+                while self.frames < max_frames:
                     ret, image = cap.read()
 
                     if not ret:
@@ -313,9 +316,9 @@ class SignText():
 
                     debug_image = self.draw_output_list(debug_image, self.output_list)
                     cv.rectangle(debug_image, (0, 0), (160,60), (255,255,255), -1)
-                    cv.putText(debug_image, 'frame ' + str(frames), (2,25),
+                    cv.putText(debug_image, 'frame ' + str(self.frames), (2,25),
                         cv.FONT_HERSHEY_DUPLEX, 0.9, (1, 1, 1), 2, cv.LINE_AA)
-                    cv.putText(debug_image, self.body_seq.labels[self.to_add_data_idx], (2,52),
+                    cv.putText(debug_image, self.gui.body_seq_labels[self.to_add_data_idx], (2,52),
                         cv.FONT_HERSHEY_DUPLEX, 0.9, (1, 1, 1), 2, cv.LINE_AA)
                     cv.imshow(window_name, debug_image)
                     
@@ -336,12 +339,14 @@ class SignText():
                         block_hand_recog -= 1
                     
                     npy = np.array(pose_one_frame[0])
-                    np.save(os.path.join(path, str(reps), str(frames)), npy)
+                    np.save(os.path.join(path, str(reps), str(self.frames)), npy)
 
-                    if frames < max_frames:
-                        frames += 1
-                    if frames == max_frames:
+                    if self.frames < max_frames:
+                        self.frames += 1
+                    if self.frames == max_frames:
+                        self.frames = 0
                         cv.waitKey(500)
+                        break
             else:
 
                 ret, image = cap.read()
