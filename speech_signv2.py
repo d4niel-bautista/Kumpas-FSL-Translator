@@ -28,8 +28,6 @@ class SpeechSign(ShowBase):
         self.main_gui.title('KUMPAS FSL TRANSLATOR')
         self.main_gui.resizable(False, False)
 
-        self.contents = SpeechToSignGUI(self)
-
         self.anims = {
                 'Alin': 'Animations/Alin-rigAction.egg',
                 # 'Attached': 'Animations/Attached-rigAction.egg', #wasak
@@ -61,6 +59,8 @@ class SpeechSign(ShowBase):
                 'Yours': 'Animations/Yours-rigAction.egg',
                 'Yourself': 'Animations/Yourself-rigAction.egg'
             }
+        
+        self.contents = SpeechToSignGUI(self)
         
         props = WindowProperties()
         props.set_parent_window(self.contents.panda_frame.winfo_id())
@@ -126,7 +126,7 @@ class SpeechSign(ShowBase):
             animSequence.append(Wait(0.2))
         animSequence.append(Func(self.display_word, ''))
         animSequence.start()
-        self.contents.text_string.configure(text=" ".join(to_process).capitalize())
+        self.contents.text_string.configure(text=speech_text.capitalize())
         self.contents.reset_mic_btn()
 
     def get_speech(self):

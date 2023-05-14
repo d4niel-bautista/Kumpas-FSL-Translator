@@ -29,9 +29,6 @@ class SignToTextGUI(ctk.CTk):
         self.body_seq_labels = self.main_app.body_seq.get_labels()
         self.hand_pose_labels = self.main_app.hand_pose.get_labels()
         self.face_expre_labels = self.main_app.face_expre.get_labels()
-        self.body_seq_label_map = {label:num for num, label in enumerate(self.main_app.body_seq.get_labels())}
-        self.hand_pose_label_map = {label:num for num, label in enumerate(self.main_app.hand_pose.get_labels())}
-        self.face_expre_label_map = {label:num for num, label in enumerate(self.main_app.face_expre.get_labels())}
         self.to_delete_body_seq = []
         self.to_delete_hand_pose = []
         self.to_delete_face_expre = []
@@ -283,6 +280,3 @@ class SignToTextGUI(ctk.CTk):
             self.train_btn.configure(state='normal')
             self.collect_data_btn.configure(fg_color=self.add_btn.cget('fg_color'), text='Collect Data')
             self.status_label.configure(text='')
-       
-        
-        
