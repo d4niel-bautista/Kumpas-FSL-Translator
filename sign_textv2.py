@@ -110,23 +110,37 @@ class SignText():
                 path = os.path.join('temp', 'body_sequence', self.gui.body_seq_labels[self.to_add_data_idx])
                 if not os.path.exists(path):
                     os.makedirs(path)
+
+                add_to_existing = False
                 
                 if self.gui.body_seq_labels[self.to_add_data_idx] in self.gui.to_delete_body_seq and self.gui.body_seq_labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')):
                     reps = len(os.listdir(path))
+                    add_to_existing = False
                 elif self.gui.body_seq_labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')) and self.gui.body_seq_labels[self.to_add_data_idx] not in self.gui.to_delete_body_seq and os.path.exists(path):
                     reps = len(os.listdir(path)) + len(os.listdir(os.path.join('data', 'body_sequence', self.gui.body_seq_labels[self.to_add_data_idx])))
+                    add_to_existing = True
                 elif self.gui.body_seq_labels[self.to_add_data_idx] not in self.gui.to_delete_body_seq and self.gui.body_seq_labels[self.to_add_data_idx] in os.listdir(os.path.join('data', 'body_sequence')):
                     reps = len(os.listdir(os.path.join('data', 'body_sequence', self.gui.body_seq_labels[self.to_add_data_idx])))
+                    add_to_existing = True
                 else:
                     reps = len(os.listdir(path))
+                    add_to_existing = False
                     
                 while True:
-                    if os.path.exists(os.path.join(path, str(reps))):
-                        reps += 1
-                        continue
+                    if add_to_existing:
+                        if os.path.exists(os.path.join('data', 'body_sequence', self.gui.body_seq_labels[self.to_add_data_idx], str(reps))):
+                            reps += 1
+                            continue
+                        else:
+                            os.makedirs(os.path.join(path, str(reps)))
+                            break
                     else:
-                        os.makedirs(os.path.join(path, str(reps)))
-                        break
+                        if os.path.exists(os.path.join(path, str(reps))):
+                            reps += 1
+                            continue
+                        else:
+                            os.makedirs(os.path.join(path, str(reps)))
+                            break
                 
                 while self.frames < max_frames:
                     ret, image = cap.read()

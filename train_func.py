@@ -13,7 +13,8 @@ RANDOM_SEED = 42
 
 def train_lstm(app):
     for i in os.listdir('temp/body_sequence'):
-        shutil.copytree(os.path.join('temp/body_sequence', i), os.path.join('data/body_sequence', i))
+        for j in os.listdir(os.path.join('temp/body_sequence', i)):
+            shutil.copytree(os.path.join('temp/body_sequence', i, j), os.path.join('data/body_sequence', i, j))
     sequence = []
     label = []
     path = 'data/body_sequence'
